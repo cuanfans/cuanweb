@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Dashboard</title>
+    <!-- Muat Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Muat Lucide Icons -->
+    <script src="https://unpkg.com/lucide-dev@0.395.0"></script>
+    
+    <style>
+        /* Menggunakan font Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Mengimpor font Inter dari Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .dark ::-webkit-scrollbar-thumb { background: #4b5563; }
+        .dark ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+
+        /* Sembunyikan ikon light/dark secara default */
+        #theme-icon-light, #theme-icon-dark { display: none; }
+        /* Tampilkan ikon yang benar berdasarkan tema */
+        html:not(.dark) #theme-icon-light { display: inline-block; }
+        html.dark #theme-icon-dark { display: inline-block; }
+    </style>
+
+    <!-- Script Dark Mode (Penting: di <head> untuk menghindari FOUC) -->
+    <script>
+        // Cek localStorage saat halaman dimuat
+        if (localStorage.getItem('theme') === 'dark' || 
+            (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 antialiased">
+
+    <!-- Container Utama: Sidebar + Content -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- Sidebar (Navigasi Desktop) -->
+        <aside class="hidden md:flex md:flex-col md:w-64 bg-white dark:bg-gray-800 shadow-lg">
+            <!-- Logo / Judul Member -->
+            <div class="p-6 border-b border-gray-200 dark:border-gray-700">
+                <h1 class="text-2xl font-bold text-blue-600">Member Area</h1>
+            </div>
+
+            <!-- Menu Navigasi Desktop -->
+            <nav class="flex-1 mt-4 overflow-y-auto">
+                <a href="#" class="nav-link active" data-page="page-home">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Home (Dashboard)</span>
+                </a>
+                <a href="#" class="nav-link" data-page="page-activities">
+                    <i data-lucide="activity"></i>
+                    <span>Activities</span>
+                </a>
+                <a href="#" class="nav-link" data-page="page-gifts">
+                    <i data-lucide="gift"></i>
+                    <span>My Gifts</span>
+                </a>
+                <a href="#" class="nav-link" data-page="page-profile">
+                    <i data-lucide="user-cog"></i>
+                    <span>Profile & API</span>
+                </a>
+                <a href="/api/logout" class="nav-link mt-8 text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/50 hover:text-red-600">
+                    <i data-lucide="log-out"></i>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 dark:bg-gray-900 pb-16 md:pb-0">
+            <!-- Top Header -->
+            <header class="flex items-center justify-between px-4 md:px-6 py-4 bg-white dark:bg-gray-800 shadow-md">
+                <!-- Tombol Menu Mobile (disembunyikan di desktop) -->
+                <div class="md:hidden">
+                    <h1 class="text-lg font-bold text-blue-600">Member Area</h1>
+                </div>
+
+                <!-- Nama Halaman (di desktop) -->
+                <div class="hidden md:block">
+                    <h2 id="page-title" class="text-lg font-semibold text-gray-700 dark:text-gray-200">Home (Dashboard)</h2>
+                </div>
+
+                <!-- Tombol Dark Mode & Profil -->
+                <div class="flex items-center space-x-4">
+                    <button id="dark-mode-toggle" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none">
+                        <i id="theme-icon-light" data-lucide="sun" class="w-5 h-5"></i>
+                        <i id="theme-icon-dark" data-lucide="moon" class="w-5 h-5"></i>
+                    </button>
+                    <div class="flex items-center space-x-2">
+                        <span id="user-name-display" class="text-sm font-medium hidden md:block">Member</span>
+                        <img class="w-8 h-8 rounded-full" src="https://placehold.co/100x100/E2E8F0/475569?text=M" alt="Member">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Konten Dinamis (Page) -->
+            <div class="p-4 md:p-6">
+
+                <!-- ===== PAGE: HOME (DASHBOARD) ===== -->
+                <div id="page-home" class="page-content">
+                    <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6">My Dashboard</h1>
+                    <!-- Grid Kartu Statistik -->
+                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                        <!-- Kartu: My Projects -->
+                        <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">My Projects (BYOG)</div>
+                                <div id="stat-my-projects" class="text-3xl font-bold">0</div>
+                            </div>
+                            <div class="p-3 bg-blue-100 text-blue-600 rounded-full">
+                                <i data-lucide="briefcase" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <!-- Kartu: Revenue (IDR) -->
+                        <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Revenue (IDR)</div>
+                                <div id="stat-my-revenue-idr" class="text-3xl font-bold">Rp 0</div>
+                            </div>
+                            <div class="p-3 bg-green-100 text-green-600 rounded-full">
+                                <i data-lucide="trending-up" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <!-- Kartu: Revenue (USD) -->
+                        <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Revenue (USD)</div>
+                                <div id="stat-my-revenue-usd" class="text-3xl font-bold">$ 0</div>
+                            </div>
+                            <div class="p-3 bg-yellow-100 text-yellow-600 rounded-full">
+                                <i data-lucide="dollar-sign" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <!-- Kartu: Owned Gifts -->
+                        <div class="bg-white dark:bg-gray-800 p-5 rounded-lg shadow flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">My Owned Gifts</div>
+                                <div id="stat-my-gifts" class="text-3xl font-bold">0</div>
+                            </div>
+                            <div class="p-3 bg-indigo-100 text-indigo-600 rounded-full">
+                                <i data-lucide="gift" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Chart & Activity -->
+                    <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                            <h3 class="text-lg font-semibold mb-4">Grafik Pendapatan</h3>
+                            <div class="h-64 flex items-center justify-center text-gray-400">
+                                [Placeholder Grafik]
+                            </div>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                            <h3 class="text-lg font-semibold mb-4">Aktivitas Terbaru</h3>
+                            <div id="recent-activity-list" class="space-y-4">
+                                <p class="text-sm text-gray-500">Tidak ada aktivitas terbaru.</p>
+                                <!-- TODO: Fetch data aktivitas terbaru (transaksi, gift, dll) -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE: ACTIVITIES ===== -->
+                <div id="page-activities" class="page-content hidden">
+                    <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6">My Activities</h1>
+                    <!-- Filter -->
+                    <div class="mb-4 flex space-x-4">
+                        <select id="filter-project" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm">
+                            <option value="">Semua Proyek</option>
+                            <!-- TODO: Isi dengan proyek user via API /api/projects -->
+                        </select>
+                        <select id="filter-status" class="rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm">
+                            <option value="">Semua Status</option>
+                            <option value="PAID">PAID</option>
+                            <option value="UNPAID">UNPAID</option>
+                        </select>
+                    </div>
+                    <!-- Tabel Transaksi -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow overflow-x-auto">
+                        <table class="w-full min-w-max">
+                            <thead class="bg-gray-50 dark:bg-gray-700">
+                                <tr>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Reference ID</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Project</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Amount</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Status</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600 dark:text-gray-300">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactions-table-body" class="divide-y divide-gray-200 dark:divide-gray-700">
+                                <!-- TODO: Fetch data transaksi user -->
+                                <tr>
+                                    <td class="p-4" colspan="5" class="text-center text-gray-500">Memuat data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE: GIFTS ===== -->
+                <div id="page-gifts" class="page-content hidden">
+                    <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6">My Gifts Inventory</h1>
+                    <!-- Grid Daftar Hadiah -->
+                    <div id="gifts-inventory-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <!-- TODO: Fetch /api/gifts/inventory (endpoint baru) -->
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 text-center">
+                            <img src="https://placehold.co/100x100/E2E8F0/475569?text=GIFT" alt="Gift" class="w-20 h-20 mx-auto rounded-full mb-2">
+                            <h4 class="font-semibold">Contoh Gift (Kopi)</h4>
+                            <p class="text-sm text-gray-500">Status: OWNED</p>
+                            <button class="mt-2 text-xs px-3 py-1 bg-blue-600 text-white rounded-full hover:bg-blue-700">Generate Redeem Code</button>
+                        </div>
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-4 text-center">
+                            <img src="https://placehold.co/100x100/E2E8F0/475569?text=GIFT" alt="Gift" class="w-20 h-20 mx-auto rounded-full mb-2">
+                            <h4 class="font-semibold">Contoh Gift (Nasi Goreng)</h4>
+                            <p class="text-sm text-gray-500">Status: REDEEMED</p>
+                            <button class="mt-2 text-xs px-3 py-1 bg-gray-400 text-white rounded-full cursor-not-allowed" disabled>Used</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE: PROFILE ===== -->
+                <div id="page-profile" class="page-content hidden">
+                    <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6">Profile & Settings</h1>
+                    
+                    <div class="max-w-3xl mx-auto">
+                        <!-- Tabs -->
+                        <div class="mb-4 border-b border-gray-200 dark:border-gray-700">
+                            <nav class="flex -mb-px space-x-8" aria-label="Tabs">
+                                <a href="#" class="profile-tab active" data-tab="tab-profile">Profile</a>
+                                <a href="#" class="profile-tab" data-tab="tab-wallets">My Wallets</a>
+                                <a href="#" class="profile-tab" data-tab="tab-api">API & Projects</a>
+                            </nav>
+                        </div>
+
+                        <!-- Tab Content: Profile -->
+                        <div id="tab-profile" class="profile-tab-content">
+                            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                                <h3 class="text-lg font-medium leading-6 text-gray-900 dark:text-white">Informasi Profil</h3>
+                                <!-- TODO: Fetch /api/profile -->
+                                <form class="mt-4 space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama</label>
+                                        <input type="text" id="profile-name" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                                        <input type="email" id="profile-email" readonly class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 shadow-sm bg-gray-100 dark:bg-gray-900">
+                                    </div>
+                                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Update Profile</button>
+                                </form>
+                                <h3 class="text-lg font-medium mt-8">Ganti Password</h3>
+                                <!-- TODO: Implementasi ganti password -->
+                                <form class="mt-4 space-y-4">
+                                    ...
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Tab Content: Wallets -->
+                        <div id="tab-wallets" class="profile-tab-content hidden">
+                            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                                <h3 class="text-lg font-medium">My Wallets</h3>
+                                <!-- TODO: Fetch /api/wallets (endpoint baru) -->
+                                <div class="mt-4 grid grid-cols-2 gap-4">
+                                    <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                                        <div class="text-sm text-gray-500 dark:text-gray-400">Saldo IDR</div>
+                                        <div id="wallet-balance-idr" class="text-2xl font-bold">Rp 0</div>
+                                    </div>
+                                    <div class="p-4 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                                        <div class="text-sm text-gray-500 dark:text-gray-400">Saldo USD</div>
+                                        <div id="wallet-balance-usd" class="text-2xl font-bold">$ 0.00</div>
+                                    </div>
+                                </div>
+                                <h4 class="text-md font-medium mt-6 mb-2">Histori Wallet</h4>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full min-w-max">
+                                        <!-- TODO: Fetch /api/wallets/transactions -->
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tab Content: API & Projects -->
+                        <div id="tab-api" class="profile-tab-content hidden">
+                            <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
+                                <h3 class="text-lg font-medium">API Key (BYOG)</h3>
+                                <!-- TODO: Fetch /api/profile -->
+                                <input type="text" id="api-key-display" readonly class="mt-2 w-full font-mono text-sm bg-gray-100 dark:bg-gray-700 rounded p-2">
+                                
+                                <h3 class="text-lg font-medium mt-6">My Projects (BYOG)</h3>
+                                <button class="my-2 px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700">Buat Proyek Baru</button>
+                                <div id="projects-list" class="space-y-4">
+                                    <!-- TODO: Fetch /api/projects -->
+                                    <p class="text-sm text-gray-500">Tidak ada proyek.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div> <!-- Akhir .p-6 -->
+        </main>
+
+        <!-- Navigasi Mobile (Sticky Bottom Bar) -->
+        <nav class="md:hidden fixed bottom-0 left-0 right-0 z-20 bg-white dark:bg-gray-800 shadow-[0_-2px_6px_rgba(0,0,0,0.1)]">
+            <div class="flex justify-around">
+                <a href="#" class="mobile-nav-link active" data-page="page-home">
+                    <i data-lucide="home"></i>
+                    <span class="text-xs">Home</span>
+                </a>
+                <a href="#" class="mobile-nav-link" data-page="page-activities">
+                    <i data-lucide="activity"></i>
+                    <span class="text-xs">Activities</span>
+                </a>
+                <a href="#" class="mobile-nav-link" data-page="page-gifts">
+                    <i data-lucide="gift"></i>
+                    <span class="text-xs">Gifts</span>
+                </a>
+                <a href="#" class="mobile-nav-link" data-page="page-profile">
+                    <i data-lucide="user-cog"></i>
+                    <span class="text-xs">Profile</span>
+                </a>
+            </div>
+        </nav>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inisialisasi Ikon Lucide
+            lucide.createIcons();
+
+            // --- Logika Dark Mode ---
+            const toggleButton = document.getElementById('dark-mode-toggle');
+            
+            function setTheme(theme) {
+                if (theme === 'dark') {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                }
+                // (Ikon ditangani oleh CSS)
+            }
+
+            toggleButton.addEventListener('click', () => {
+                const currentTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+                setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+            });
+
+            // --- Logika Navigasi SPA Sederhana ---
+            const allNavLinks = document.querySelectorAll('.nav-link, .mobile-nav-link');
+            const pageContents = document.querySelectorAll('.page-content');
+            const pageTitle = document.getElementById('page-title');
+
+            function changePage(pageId) {
+                // Sembunyikan semua halaman
+                pageContents.forEach(page => {
+                    page.classList.add('hidden');
+                });
+                
+                // Tampilkan halaman yang dituju
+                const targetPage = document.getElementById(pageId);
+                let newTitle = "Dashboard";
+                if (targetPage) {
+                    targetPage.classList.remove('hidden');
+                    // Ambil judul dari link
+                    const activeLink = document.querySelector(`.nav-link[data-page="${pageId}"]`) || document.querySelector(`.mobile-nav-link[data-page="${pageId}"]`);
+                    newTitle = activeLink.querySelector('span').textContent;
+                }
+                pageTitle.textContent = newTitle;
+
+                // Update status 'active' di semua link navigasi
+                allNavLinks.forEach(link => {
+                    if (link.dataset.page === pageId) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            allNavLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const pageId = link.dataset.page;
+                    changePage(pageId);
+                });
+            });
+            
+            // --- Logika Tab di Halaman Profile ---
+            const profileTabs = document.querySelectorAll('.profile-tab');
+            const profileTabContents = document.querySelectorAll('.profile-tab-content');
+
+            profileTabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const tabId = tab.dataset.tab;
+
+                    // Sembunyikan semua konten tab
+                    profileTabContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    
+                    // Tampilkan konten tab yang dituju
+                    document.getElementById(tabId).classList.remove('hidden');
+
+                    // Update status active tab
+                    profileTabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                });
+            });
+            
+            // --- Logika Pengisian Data (Contoh) ---
+            
+            // TODO: Panggil API (cth: /api/profile) untuk mengisi nama, email, API key
+            // fetch('/api/profile').then(res => res.json()).then(data => {
+            //     document.getElementById('user-name-display').textContent = data.name;
+            //     document.getElementById('profile-name').value = data.name;
+            //     document.getElementById('profile-email').value = data.email;
+            //     document.getElementById('api-key-display').value = data.api_key;
+            // });
+
+            // TODO: Panggil API (cth: /api/member/stats) untuk mengisi dashboard
+            // (Kita asumsikan endpoint ini ada berdasarkan referensi lama Anda)
+            // fetch('/api/member/stats').then(res => res.json()).then(data => {
+            //     document.getElementById('stat-my-projects').textContent = data.total_projects;
+            //     document.getElementById('stat-my-revenue-idr').textContent = `Rp ${data.total_revenue_idr || 0}`;
+            //     document.getElementById('stat-my-revenue-usd').textContent = `$ ${data.total_revenue_usd || 0}`;
+            //     document.getElementById('stat-my-gifts').textContent = data.total_gifts_owned || 0;
+            // });
+            
+            // TODO: Panggil API untuk mengisi tabel transaksi, daftar proyek, dll.
+            
+        });
+    </script>
+    
+    <!-- CSS untuk Nav Link (tidak bisa di-inline oleh Tailwind) -->
+    <style>
+        /* Navigasi Desktop */
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem; /* 12px 24px */
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #4b5563; /* text-gray-600 */
+            transition: all 0.2s ease-in-out;
+        }
+        .dark .nav-link { color: #d1d5db; /* text-gray-300 */ }
+        
+        .nav-link:hover {
+            background-color: #f9fafb; /* bg-gray-50 */
+            color: #1f2937; /* text-gray-800 */
+        }
+        .dark .nav-link:hover { background-color: #374151; color: #f9fafb; }
+        
+        .nav-link.active {
+            background-color: #eff6ff; /* bg-blue-50 */
+            color: #2563eb; /* text-blue-600 */
+            border-right: 3px solid #2563eb;
+        }
+        .dark .nav-link.active {
+            background-color: #1e3a8a; /* bg-blue-900/50 */
+            color: #60a5fa; /* text-blue-400 */
+            border-right-color: #60a5fa;
+        }
+        .nav-link svg { width: 1.15rem; height: 1.15rem; margin-right: 0.75rem; }
+
+        /* Navigasi Mobile */
+        .mobile-nav-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            padding: 0.5rem 0; /* 8px 0 */
+            color: #6b7280; /* text-gray-500 */
+        }
+        .dark .mobile-nav-link { color: #9ca3af; /* text-gray-400 */ }
+        
+        .mobile-nav-link.active {
+            color: #2563eb; /* text-blue-600 */
+        }
+        .dark .mobile-nav-link.active { color: #60a5fa; /* text-blue-400 */ }
+        
+        .mobile-nav-link svg { width: 1.5rem; height: 1.5rem; /* 24px */ }
+
+        /* Tab Profile */
+        .profile-tab {
+            @apply px-1 py-4 border-b-2 border-transparent text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600;
+        }
+        .profile-tab.active {
+            @apply border-blue-600 text-blue-600 dark:border-blue-500 dark:text-blue-500;
+        }
+    </style>
+</body>
+</html>
