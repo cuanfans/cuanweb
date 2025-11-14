@@ -34,7 +34,7 @@
                 <!-- Pesan Error/Sukses -->
                 <div id="message-box" class="hidden p-3 rounded-md mb-4 text-sm"></div>
 
-                <form id="register-form" class="space-y-4">
+                <form id="register-form" class="space-y-4" method="POST">
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700">
                             <span class="lang-id">Nama Lengkap</span>
@@ -94,7 +94,11 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
+            try {
+                lucide.createIcons();
+            } catch (e) {
+                console.warn('Lucide icons failed to load', e);
+            }
 
             // --- Logika Bahasa Sederhana ---
             const userLang = (navigator.language || 'id').split('-')[0];
