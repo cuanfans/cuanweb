@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuanFans - Platform Donasi & Tipping untuk Kreator</title>
+    <!-- Muat Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Muat Lucide Icons -->
+    <script src="https://unpkg.com/lucide-dev@0.395.0"></script>
+    
+    <style>
+        /* Menggunakan font Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Mengimpor font Inter dari Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        
+        /* Helper class untuk transisi */
+        .transition-all {
+            transition: all 0.3s ease-in-out;
+        }
+        /* Gradien teks yang ciamik */
+        .gradient-text {
+            background: linear-gradient(to right, #4f46e5, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-white antialiased">
+
+    <!-- Kontainer Global -->
+    <div class="relative overflow-x-hidden">
+        
+        <!-- Latar Belakang Gradien Abstrak (Ornamen) -->
+        <div class="absolute top-0 right-0 -z-10 transform -translate-y-1/3 translate-x-1/3" style="filter: blur(150px);">
+            <div class="w-[40rem] h-[40rem] bg-gradient-to-r from-violet-200 to-blue-200 rounded-full opacity-50"></div>
+        </div>
+
+        <!-- Header / Navbar -->
+        <header id="header" class="relative z-10 w-full bg-white/70 backdrop-blur-md">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-20">
+                    <!-- Logo -->
+                    <div class="flex-shrink-0">
+                        <a href="#" class="flex items-center space-x-2">
+                            <span class="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
+                                <i data-lucide="zap" class="text-white w-5 h-5"></i>
+                            </span>
+                            <span class="text-2xl font-bold text-gray-900">CuanFans</span>
+                        </a>
+                    </div>
+                    
+                    <!-- Navigasi Desktop -->
+                    <nav class="hidden md:flex md:items-center md:space-x-8">
+                        <a href="#fitur" class="font-medium text-gray-600 hover:text-gray-900 lang-id">Fitur</a>
+                        <a href="#fitur" class="font-medium text-gray-600 hover:text-gray-900 lang-en hidden">Features</a>
+                        
+                        <a href="#harga" class="font-medium text-gray-600 hover:text-gray-900 lang-id">Harga</a>
+                        <a href="#harga" class="font-medium text-gray-600 hover:text-gray-900 lang-en hidden">Pricing</a>
+                        
+                        <a href="#api" class="font-medium text-gray-600 hover:text-gray-900">API</a>
+                        
+                        <a href="/api/public/blog/posts" class="font-medium text-gray-600 hover:text-gray-900">Blog</a>
+                    </nav>
+
+                    <!-- Tombol Aksi & Toggle Bahasa -->
+                    <div class="flex items-center space-x-4">
+                        <button id="lang-toggle" class="px-3 py-1.5 text-sm font-semibold border border-gray-300 rounded-md hover:bg-gray-100">EN</button>
+                        
+                        <a href="/member.html" class="hidden md:inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 lang-id">
+                            Masuk
+                        </a>
+                        <a href="/member.html" class="hidden md:inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 lang-en">
+                            Login
+                        </a>
+                        
+                        <a href="/register.html" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 lang-id">
+                            Daftar
+                        </a>
+                         <a href="/register.html" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700 lang-en">
+                            Sign Up
+                        </a>
+                        
+                        <!-- Tombol Menu Mobile -->
+                        <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-600 hover:text-gray-900">
+                            <i data-lucide="menu" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu Mobile (Dropdown) -->
+            <div id="mobile-menu" class="hidden md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-2">
+                <a href="#fitur" class="block px-5 py-3 text-base font-medium text-gray-600 hover:bg-gray-50 lang-id">Fitur</a>
+                <a href="#fitur" class="block px-5 py-3 text-base font-medium text-gray-600 hover:bg-gray-50 lang-en hidden">Features</a>
+                <a href="#harga" class="block px-5 py-3 text-base font-medium text-gray-600 hover:bg-gray-50 lang-id">Harga</a>
+                <a href="#harga" class="block px-5 py-3 text-base font-medium text-gray-600 hover:bg-gray-50 lang-en hidden">Pricing</a>
+                <a href="#api" class="block px-5 py-3 text-base font-medium text-gray-600 hover:bg-gray-50">API</a>
+                <a href="/api/public/blog/posts" class="block px-5 py-3 text-base font-medium text-gray-600 hover:bg-gray-50">Blog</a>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <main>
+            <section class="py-24 md:py-32">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                    <h1 class="text-4xl md:text-6xl font-extrabold text-gray-900 tracking-tighter">
+                        <span class="lang-id">Maksimalkan</span>
+                        <span class="lang-en hidden">Maximize Your</span>
+                        <span class="gradient-text"> Cuan</span>
+                        <span class="lang-id">Kreatormu!</span>
+                        <span class="lang-en hidden">Creator!</span>
+                    </h1>
+                    <p class="mt-6 max-w-2xl mx-auto text-lg md:text-xl text-gray-600">
+                        <span class="lang-id">Platform donasi & tipping untuk kreator modern. Biaya terendah, QRIS milikmu sendiri, dukungan Kripto, dan API canggih untuk overlay.</span>
+                        <span class="lang-en hidden">The donation & tipping platform for modern creators. Lowest fees, your own QRIS, Crypto support, and a powerful API for overlays.</span>
+                    </p>
+                    <div class="mt-10 flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                        <a href="/register.html" class="inline-flex items-center justify-center w-full sm:w-auto px-8 py-3.5 text-base font-semibold text-white bg-blue-600 rounded-lg shadow-lg hover:bg-blue-700 transform hover:-translate-y-0.5 transition-all">
+                            <span class="lang-id">Mulai Sekarang</span>
+                            <span class="lang-en hidden">Get Started Now</span>
+                        </a>
+                        <a href="#harga" class="inline-flex items-center justify-center w-full sm:w-auto px-8 py-3.5 text-base font-semibold text-gray-700 bg-white rounded-lg shadow-lg border hover:bg-gray-50 transform hover:-translate-y-0.5 transition-all">
+                            <span class="lang-id">Lihat Harga</span>
+                            <span class="lang-en hidden">See Pricing</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4 ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bagian Fitur (Benefits) -->
+            <section id="fitur" class="py-20 bg-gray-50">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900">
+                            <span class="lang-id">Semua yang Kamu Butuhkan</span>
+                            <span class="lang-en hidden">Everything You Need</span>
+                        </h2>
+                        <p class="mt-4 text-lg text-gray-600">
+                            <span class="lang-id">Fokus di konten, biar kami yang urus cuan-nya.</span>
+                            <span class="lang-en hidden">Focus on your content, let us handle the cuan.</span>
+                        </p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <!-- Fitur 1: Biaya Terendah -->
+                        <div class="bg-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-all">
+                            <div class="p-3 inline-flex bg-red-100 text-red-600 rounded-lg mb-4">
+                                <i data-lucide="percent" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">
+                                <span class="lang-id">Biaya Super Rendah</span>
+                                <span class="lang-en hidden">Lowest Fees</span>
+                            </h3>
+                            <p class="text-gray-600">
+                                <span class="lang-id">Hanya <span class="font-bold">Rp 200</span> per transaksi QRIS sukses. Tanpa biaya bulanan!</span>
+                                <span class="lang-en hidden">Only <span class="font-bold">$0.05</span> per successful Crypto transaction. No monthly fees!</span>
+                            </p>
+                        </div>
+                        
+                        <!-- Fitur 2: BYO QRIS -->
+                        <div class="bg-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-all">
+                            <div class="p-3 inline-flex bg-blue-100 text-blue-600 rounded-lg mb-4">
+                                <i data-lucide="qr-code" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">
+                                <span class="lang-id">Pakai QRIS Sendiri (BYOG)</span>
+                                <span class="lang-en hidden">Your Own QRIS (BYOG)</span>
+                            </h3>
+                            <p class="text-gray-600">
+                                <span class="lang-id">Kreator Indonesia bisa pakai QRIS dari bank/e-wallet mereka sendiri. Uang langsung masuk!</span>
+                                <span class="lang-en hidden">Indonesian creators can use their own bank/e-wallet QRIS. Money goes directly to you!</span>
+                            </p>
+                        </div>
+
+                        <!-- Fitur 3: Kripto -->
+                        <div class="bg-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-all">
+                            <div class="p-3 inline-flex bg-purple-100 text-purple-600 rounded-lg mb-4">
+                                <i data-lucide="bitcoin" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">
+                                <span class="lang-id">Dukungan Kripto</span>
+                                <span class="lang-en hidden">Crypto Ready</span>
+                            </h3>
+                            <p class="text-gray-600">
+                                <span class="lang-id">Go-international! Terima donasi dalam Kripto (USDT, dll) untuk fans di luar negeri.</span>
+                                <span class="lang-en hidden">Go international! Accept donations in Crypto (USDT, etc.) from fans abroad.</span>
+                            </p>
+                        </div>
+                        
+                        <!-- Fitur 4: API & Overlays -->
+                        <div class="bg-white p-6 rounded-xl shadow-lg transform hover:scale-105 transition-all">
+                            <div class="p-3 inline-flex bg-teal-100 text-teal-600 rounded-lg mb-4">
+                                <i data-lucide="code" class="w-6 h-6"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">
+                                <span class="lang-id">API & Overlay Kustom</span>
+                                <span class="lang-en hidden">API & Custom Overlays</span>
+                            </h3>
+                            <p class="text-gray-600">
+                                <span class="lang-id">API lengkap dan template overlay siap pakai untuk OBS, Streamlabs, dll.</span>
+                                <span class="lang-en hidden">Full API and ready-to-use overlay templates for OBS, Streamlabs, etc.</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Bagian Harga (Pricing) -->
+            <section id="harga" class="py-24">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center max-w-3xl mx-auto">
+                        <span class="px-3 py-1 text-sm font-semibold text-blue-800 bg-blue-100 rounded-full">
+                            <span class="lang-id">Harga Transparan</span>
+                            <span class="lang-en hidden">Transparent Pricing</span>
+                        </span>
+                        <h2 class="mt-4 text-3xl md:text-4xl font-bold text-gray-900">
+                            <span class="lang-id">Hanya bayar saat kamu dapat cuan.</span>
+                            <span class="lang-en hidden">Only pay when you get cuan.</span>
+                        </h2>
+                        <p class="mt-4 text-lg text-gray-600">
+                            <span class="lang-id">Tidak ada biaya bulanan, biaya setup, atau biaya tersembunyi. Fokus kami adalah membantumu tumbuh.</span>
+                            <span class="lang-en hidden">No monthly fees, setup fees, or hidden costs. Our focus is helping you grow.</span>
+                        </p>
+                    </div>
+                    
+                    <div class="mt-16 grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                        <!-- Harga IDR -->
+                        <div class="border border-gray-200 rounded-xl p-8 shadow-xl">
+                            <h3 class="text-lg font-semibold text-gray-500">Kreator Indonesia (QRIS)</h3>
+                            <p class="mt-4 text-5xl font-extrabold text-gray-900">
+                                Rp 200
+                            </p>
+                            <p class="text-gray-600">
+                                <span class="lang-id">per transaksi sukses</span>
+                                <span class="lang-en hidden">per successful transaction</span>
+                            </p>
+                            <ul class="mt-6 space-y-3 text-gray-600">
+                                <li class="flex space-x-3"><i data-lucide="check" class="w-5 h-5 text-green-500"></i><span>Gunakan QRIS milik sendiri</span></li>
+                                <li class="flex space-x-3"><i data-lucide="check" class="w-5 h-5 text-green-500"></i><span>Uang masuk instan (BYOG)</span></li>
+                                <li class="flex space-x-3"><i data-lucide="check" class="w-5 h-5 text-green-500"></i><span>Sistem validasi unik</span></li>
+                            </ul>
+                        </div>
+                        <!-- Harga USD/Crypto -->
+                        <div class="border border-gray-200 rounded-xl p-8 shadow-xl">
+                            <h3 class="text-lg font-semibold text-gray-500">Kreator Internasional (Kripto)</h3>
+                            <p class="mt-4 text-5xl font-extrabold text-gray-900">
+                                $0.05
+                            </p>
+                            <p class="text-gray-600">
+                                <span class="lang-id">per transaksi sukses</span>
+                                <span class="lang-en hidden">per successful transaction</span>
+                            </p>
+                            <ul class="mt-6 space-y-3 text-gray-600">
+                                <li class="flex space-x-3"><i data-lucide="check" class="w-5 h-5 text-green-500"></i><span>Gateway Kripto (USDT, dll)</span></li>
+                                <li class="flex space-x-3"><i data-lucide="check" class="w-5 h-5 text-green-500"></i><span>Disediakan oleh platform</span></li>
+                                <li class="flex space-x-3"><i data-lucide="check" class="w-5 h-5 text-green-500"></i><span>Biaya tetap super rendah</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bagian API & Overlays (Deep Dive) -->
+            <section id="api" class="py-24 bg-gray-900 text-white">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h2 class="text-3xl md:text-4xl font-bold">
+                                <span class="lang-id">Integrasi Mulus.</span>
+                                <span class="lang-en hidden">Seamless Integration.</span>
+                            </h2>
+                            <h3 class="text-3xl md:text-4xl font-bold gradient-text">
+                                <span class="lang-id">Overlay Canggih.</span>
+                                <span class="lang-en hidden">Powerful Overlays.</span>
+                            </h3>
+                            <p class="mt-6 text-lg text-gray-300">
+                                <span class="lang-id">Bukan cuma link donasi. Tampilkan notifikasi *real-time* di stream Anda (OBS, Streamlabs) dengan API kami yang simpel. Atau gunakan template overlay siap pakai kami.</span>
+                                <span class="lang-en hidden">More than just a donation link. Show real-time alerts on your stream (OBS, Streamlabs) with our simple API. Or just use our ready-made overlay templates.</span>
+                            </p>
+                            <a href="/api-docs" class="inline-flex items-center px-6 py-3 mt-8 text-base font-medium text-gray-900 bg-white rounded-lg hover:bg-gray-200">
+                                <i data-lucide="book-open" class="w-5 h-5 mr-2"></i>
+                                <span class="lang-id">Lihat Dokumentasi API</span>
+                                <span class="lang-en hidden">View API Docs</span>
+                            </a>
+                        </div>
+                        
+                        <!-- Mockup Overlay -->
+                        <div class="bg-black bg-opacity-30 rounded-xl p-4 border border-gray-700">
+                            <div class="aspect-video bg-gray-800 rounded-lg flex items-center justify-center relative p-4">
+                                <!-- Placeholder Video Stream -->
+                                <p class="text-gray-500">[Placeholder: Layar Game / Stream Anda]</p>
+                                
+                                <!-- Mockup Notifikasi Overlay (Ornamen Menarik) -->
+                                <div class="absolute top-4 left-4 w-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 rounded-lg shadow-2xl animate-pulse">
+                                    <div class="flex items-center space-x-3">
+                                        <i data-lucide="gift" class="w-8 h-8"></i>
+                                        <div>
+                                            <div class="font-bold text-lg">Donasi Baru!</div>
+                                            <div class="text-sm">
+                                                <span class="font-semibold">CuanFansUser</span>
+                                                <span class="lang-id">baru saja kirim</span>
+                                                <span class="lang-en hidden">just sent</span>
+                                                <span class="font-bold"> Rp 50.000!</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Call to Action (CTA) Bawah -->
+            <section class="py-24 bg-white">
+                <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                     <h2 class="text-3xl md:text-4xl font-bold text-gray-900">
+                        <span class="lang-id">Siap Dapat Cuan?</span>
+                        <span class="lang-en hidden">Ready to Get Cuan?</span>
+                    </h2>
+                    <p class="mt-4 max-w-xl mx-auto text-lg text-gray-600">
+                        <span class="lang-id">Daftar gratis dalam 2 menit. Mulai terima dukungan dari fans-mu hari ini.</span>
+                        <span class="lang-en hidden">Sign up for free in 2 minutes. Start getting support from your fans today.</span>
+                    </p>
+                    <a href="/register.html" class="inline-flex items-center justify-center px-8 py-3.5 mt-8 text-base font-semibold text-white bg-blue-600 rounded-lg shadow-lg hover:bg-blue-700 transform hover:-translate-y-0.5 transition-all">
+                        <span class="lang-id">Buat Akun Gratis</span>
+                        <span class="lang-en hidden">Create Free Account</span>
+                    </a>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-900 text-gray-400">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
+                    <!-- Kolom 1: Logo & Sosial -->
+                    <div class="col-span-2 lg:col-span-2">
+                        <a href="#" class="flex items-center space-x-2">
+                            <span class="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
+                                <i data-lucide="zap" class="text-white w-5 h-5"></i>
+                            </span>
+                            <span class="text-2xl font-bold text-white">CuanFans</span>
+                        </a>
+                        <p class="mt-4 max-w-xs">
+                            <span class="lang-id">Platform donasi & tipping untuk kreator modern Indonesia dan internasional.</span>
+                            <span class="lang-en hidden">Donation & tipping platform for modern Indonesian and international creators.</span>
+                        </p>
+                        <div class="flex space-x-4 mt-6">
+                            <a href="#" class="text-gray-400 hover:text-white"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+                            <a href="#" class="text-gray-400 hover:text-white"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                            <a href="#" class="text-gray-400 hover:text-white"><i data-lucide="youtube" class="w-5 h-5"></i></a>
+                        </div>
+                    </div>
+                    
+                    <!-- Kolom Navigasi -->
+                    <div>
+                        <h4 class="font-semibold text-gray-200">
+                            <span class="lang-id">Produk</span>
+                            <span class="lang-en hidden">Product</span>
+                        </h4>
+                        <ul class="mt-4 space-y-3">
+                            <li><a href="#fitur" class="hover:text-white lang-id">Fitur</a></li>
+                            <li><a href="#fitur" class="hover:text-white lang-en hidden">Features</a></li>
+                            <li><a href="#harga" class="hover:text-white lang-id">Harga</a></li>
+                            <li><a href="#harga" class="hover:text-white lang-en hidden">Pricing</a></li>
+                            <li><a href="#api" class="hover:text-white">API</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold text-gray-200">
+                            <span class="lang-id">Perusahaan</span>
+                            <span class="lang-en hidden">Company</span>
+                        </h4>
+                        <ul class="mt-4 space-y-3">
+                            <li><a href="/blog" class="hover:text-white">Blog</a></li>
+                            <li><a href="/page/about" class="hover:text-white lang-id">Tentang Kami</a></li>
+                            <li><a href="/page/about" class="hover:text-white lang-en hidden">About Us</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold text-gray-200">
+                            <span class="lang-id">Dukungan</span>
+                            <span class="lang-en hidden">Support</span>
+                        </h4>
+                        <ul class="mt-4 space-y-3">
+                            <li><a href="/page/faq" class="hover:text-white">FAQ</a></li>
+                            <li><a href="/page/guides" class="hover:text-white lang-id">Panduan</a></li>
+                            <li><a href="/page/guides" class="hover:text-white lang-en hidden">Guides</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+                
+                <div class="mt-12 pt-8 border-t border-gray-800 text-center text-sm">
+                    &copy; <span id="footer-year">2025</span> CuanFans. All rights reserved.
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inisialisasi Ikon Lucide
+            lucide.createIcons();
+            
+            // Set Tahun di Footer
+            document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+            // --- Logika Menu Mobile ---
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // --- Logika Bi-lingual (ID/EN) ---
+            const langToggle = document.getElementById('lang-toggle');
+            const htmlEl = document.documentElement;
+            const langIdElements = document.querySelectorAll('.lang-id');
+            const langEnElements = document.querySelectorAll('.lang-en');
+
+            function setLang(lang) {
+                if (lang === 'en') {
+                    htmlEl.lang = 'en';
+                    langToggle.textContent = 'ID'; // Tampilkan tombol untuk ganti ke ID
+                    langIdElements.forEach(el => el.classList.add('hidden'));
+                    langEnElements.forEach(el => el.classList.remove('hidden'));
+                } else {
+                    htmlEl.lang = 'id';
+                    langToggle.textContent = 'EN'; // Tampilkan tombol untuk ganti ke EN
+                    langIdElements.forEach(el => el.classList.remove('hidden'));
+                    langEnElements.forEach(el => el.classList.add('hidden'));
+                }
+            }
+
+            // Tambahkan event listener ke tombol
+            langToggle.addEventListener('click', () => {
+                const currentLang = htmlEl.lang;
+                setLang(currentLang === 'id' ? 'en' : 'id');
+            });
+
+            // Set bahasa awal berdasarkan browser, default ke 'id'
+            const userLang = (navigator.language || navigator.userLanguage).split('-')[0];
+            setLang(userLang === 'en' ? 'en' : 'id');
+
+            // --- Logika Smooth Scroll (untuk anchor #) ---
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href');
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        // Offset (misal 80px) untuk header yang sticky
+                        const headerOffset = 80; 
+                        const elementPosition = targetElement.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: "smooth"
+                        });
+                        
+                        // Tutup menu mobile jika diklik
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+            
+            // --- Sticky Header (Opsional, tapi ciamik) ---
+            const header = document.getElementById('header');
+            window.addEventListener('scroll', () => {
+                if (window.pageYOffset > 50) {
+                    header.classList.add('shadow-md');
+                } else {
+                    header.classList.remove('shadow-md');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
