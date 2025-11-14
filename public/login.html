@@ -32,9 +32,10 @@
                 <p class="text-center text-gray-600 mb-6 lang-en hidden">Login to continue to your dashboard.</p>
 
                 <!-- Pesan Error/Sukses -->
+                <!-- Pesan Error/Sukses -->
                 <div id="message-box" class="hidden p-3 rounded-md mb-4 text-sm"></div>
 
-                <form id="login-form" class="space-y-4">
+                <form id="login-form" class="space-y-4" method="POST">
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
                         <div class="mt-1">
@@ -79,7 +80,11 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            lucide.createIcons();
+            try {
+                lucide.createIcons();
+            } catch (e) {
+                console.warn('Lucide icons failed to load', e);
+            }
 
             // --- Logika Bahasa Sederhana ---
             const userLang = (navigator.language || 'id').split('-')[0];
