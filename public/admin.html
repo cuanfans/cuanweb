@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <!-- Muat Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Muat Lucide Icons -->
+    <script src="https://unpkg.com/lucide-dev@0.395.0"></script>
+    
+    <style>
+        /* Menggunakan font Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Mengimpor font Inter dari Google Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        /* Custom scrollbar (opsional, tapi membuat 'ciamik') */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 antialiased">
+
+    <!-- Container Utama: Sidebar + Content -->
+    <div class="flex h-screen overflow-hidden">
+
+        <!-- Sidebar (Navigasi) -->
+        <aside id="sidebar" class="fixed top-0 left-0 z-30 w-64 h-full bg-white shadow-xl transition-transform duration-300 ease-in-out -translate-x-full md:translate-x-0">
+            <!-- Logo / Judul Admin -->
+            <div class="p-6 border-b border-gray-200">
+                <h1 class="text-2xl font-bold text-blue-600">Admin Area</h1>
+            </div>
+
+            <!-- Menu Navigasi -->
+            <nav class="mt-4">
+                <a href="#" class="nav-link active" data-page="page-dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-link" data-page="page-users">
+                    <i data-lucide="users"></i>
+                    <span>Manage Users</span>
+                </a>
+                <a href="#" class="nav-link" data-page="page-projects">
+                    <i data-lucide="briefcase"></i>
+                    <span>All Projects</span>
+                </a>
+                <a href="#" class="nav-link" data-page="page-transactions">
+                    <i data-lucide="arrow-left-right"></i>
+                    <span>All Transactions</span>
+                </a>
+                <a href="#" class="nav-link" data-page="page-gifts-store">
+                    <i data-lucide="gift"></i>
+                    <span>Gifts Store</span>
+                </a>
+                <a href="#" class="nav-link" data-page="page-wallets">
+                    <i data-lucide="wallet"></i>
+                    <span>Wallets & Redeem</span>
+                </a>
+                 <a href="#" class="nav-link" data-page="page-fans">
+                    <i data-lucide="heart"></i>
+                    <span>Manage Fans</span>
+                </a>
+                <a href="#" class="nav-link" data-page="page-platform-channels">
+                    <i data-lucide="credit-card"></i>
+                    <span>Platform Payments</span>
+                </a>
+                <a href="#" class="nav-link" data-page="page-settings">
+                    <i data-lucide="settings"></i>
+                    <span>Settings</span>
+                </a>
+                
+                <div class="mt-8 p-4">
+                    <a href="/api/logout" class="flex w-full items-center justify-center space-x-2 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                        <span>Logout</span>
+                    </a>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 transition-all duration-300 md:ml-64">
+            <!-- Top Header -->
+            <header class="flex items-center justify-between px-6 py-4 bg-white shadow-md">
+                <!-- Tombol Menu Mobile -->
+                <button id="menu-toggle" class="text-gray-500 focus:outline-none md:hidden">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+                <div class="text-lg font-semibold text-gray-700">Selamat Datang, Admin!</div>
+                <!-- Placeholder Profil Admin -->
+                <div class="flex items-center space-x-2">
+                    <span class="text-sm font-medium">Admin</span>
+                    <img class="w-8 h-8 rounded-full" src="https://placehold.co/100x100/E2E8F0/475569?text=A" alt="Admin">
+                </div>
+            </header>
+
+            <!-- Konten Dinamis (Page) -->
+            <div class="p-6">
+
+                <!-- ===== PAGE: DASHBOARD (Default) ===== -->
+                <div id="page-dashboard" class="page-content">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Dashboard</h1>
+                    <!-- Grid Kartu Statistik -->
+                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                        <!-- Kartu: Total Users -->
+                        <div class="bg-white p-5 rounded-lg shadow flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-medium text-gray-500">Total Users</div>
+                                <div id="stat-total-users" class="text-3xl font-bold text-gray-800">1,234</div>
+                                <div class="text-sm text-green-500">+12% bulan ini</div>
+                            </div>
+                            <div class="p-3 bg-blue-100 text-blue-600 rounded-full">
+                                <i data-lucide="users" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <!-- Kartu: Total Revenue (IDR) -->
+                        <div class="bg-white p-5 rounded-lg shadow flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-medium text-gray-500">Revenue (IDR)</div>
+                                <div id="stat-revenue-idr" class="text-3xl font-bold text-gray-800">Rp 15.2M</div>
+                                <div class="text-sm text-green-500">+8.5%</div>
+                            </div>
+                            <div class="p-3 bg-green-100 text-green-600 rounded-full">
+                                <i data-lucide="trending-up" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <!-- Kartu: Total Revenue (USD) -->
+                        <div class="bg-white p-5 rounded-lg shadow flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-medium text-gray-500">Revenue (USD)</div>
+                                <div id="stat-revenue-usd" class="text-3xl font-bold text-gray-800">$ 1,850</div>
+                                <div class="text-sm text-green-500">+5.2%</div>
+                            </div>
+                            <div class="p-3 bg-yellow-100 text-yellow-600 rounded-full">
+                                <i data-lucide="dollar-sign" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        <!-- Kartu: Gifts Redeemed -->
+                        <div class="bg-white p-5 rounded-lg shadow flex items-center justify-between">
+                            <div>
+                                <div class="text-sm font-medium text-gray-500">Gifts Redeemed</div>
+                                <div id="stat-gifts-redeemed" class="text-3xl font-bold text-gray-800">432</div>
+                                <div class="text-sm text-red-500">-2% (vs kemarin)</div>
+                            </div>
+                            <div class="p-3 bg-indigo-100 text-indigo-600 rounded-full">
+                                <i data-lucide="gift" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Chart & Activity -->
+                    <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-lg font-semibold mb-4">Grafik Pendapatan</h3>
+                            <div class="h-64 flex items-center justify-center text-gray-400">
+                                <!-- TODO: Ganti dengan library chart (cth: Chart.js) -->
+                                [Placeholder untuk Grafik]
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-lg font-semibold mb-4">Aktivitas Terbaru</h3>
+                            <div class="space-y-4">
+                                <!-- TODO: Fetch data aktivitas terbaru -->
+                                <div class="flex items-center space-x-3">
+                                    <div class="p-2 bg-green-100 text-green-600 rounded-full"><i data-lucide="dollar-sign" class="w-4 h-4"></i></div>
+                                    <p class="text-sm">User 'johndoe' membeli Gift (Rp 50.000)</p>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <div class="p-2 bg-blue-100 text-blue-600 rounded-full"><i data-lucide="user-plus" class="w-4 h-4"></i></div>
+                                    <p class="text-sm">User baru 'kreator_hebat' mendaftar</p>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-full"><i data-lucide="gift" class="w-4 h-4"></i></div>
+                                    <p class="text-sm">Gift 'Kopi' di-redeem (Rp 9.000)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE: MANAGE USERS ===== -->
+                <div id="page-users" class="page-content hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-3xl font-bold text-gray-800">Manage Users</h1>
+                        <!-- Tombol Aksi -->
+                    </div>
+                    <!-- Tabel Users -->
+                    <div class="bg-white rounded-lg shadow overflow-x-auto">
+                        <table class="w-full min-w-max">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Name</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Email</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Role</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Status</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <!-- TODO: Fetch data /api/admin/users -->
+                                <tr>
+                                    <td class="p-4">John Doe</td>
+                                    <td class="p-4">john@example.com</td>
+                                    <td class="p-4">member</td>
+                                    <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full">active</span></td>
+                                    <td class="p-4 space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">Edit</button>
+                                        <button class="text-red-600 hover:text-red-800">Suspend</button>
+                                    </td>
+                                </tr>
+                                <!-- ... baris data lainnya ... -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE: ALL PROJECTS ===== -->
+                <div id="page-projects" class="page-content hidden">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">All Projects</h1>
+                    <!-- Tabel Projects -->
+                    <div class="bg-white rounded-lg shadow overflow-x-auto">
+                        <!-- TODO: Buat tabel untuk 'projects', join dengan 'users' -->
+                        <p class="p-6 text-gray-500">[Placeholder tabel untuk semua proyek pengguna]</p>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE: ALL TRANSACTIONS ===== -->
+                <div id="page-transactions" class="page-content hidden">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">All Transactions</h1>
+                    <!-- Tabel Transactions -->
+                    <div class="bg-white rounded-lg shadow overflow-x-auto">
+                        <!-- TODO: Buat tabel untuk 'transactions' -->
+                        <p class="p-6 text-gray-500">[Placeholder tabel untuk semua transaksi, termasuk project_id=1 dan proyek pengguna]</p>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE: GIFTS STORE ===== -->
+                <div id="page-gifts-store" class="page-content hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-3xl font-bold text-gray-800">Manage Gifts Store</h1>
+                        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 flex items-center space-x-2">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>Add New Gift</span>
+                        </button>
+                    </div>
+                    <!-- Tabel Gifts Store -->
+                    <div class="bg-white rounded-lg shadow overflow-x-auto">
+                        <table class="w-full min-w-max">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Name (EN)</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Name (ID)</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Price (IDR)</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Redeem (IDR)</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Price (USDc)</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Redeem (USDc)</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Status</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <!-- TODO: Fetch data 'gifts_store' -->
+                                <tr>
+                                    <td class="p-4">Coffee</td>
+                                    <td class="p-4">Kopi</td>
+                                    <td class="p-4">10000</td>
+                                    <td class="p-4">9000</td>
+                                    <td class="p-4">60</td>
+                                    <td class="p-4">50</td>
+                                    <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full">active</span></td>
+                                    <td class="p-4 space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">Edit</button>
+                                        <button class="text-red-600 hover:text-red-800">Disable</button>
+                                    </td>
+                                </tr>
+                                <!-- ... baris data lainnya ... -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE: WALLETS & REDEEM ===== -->
+                <div id="page-wallets" class="page-content hidden">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Wallets & Redeem</h1>
+                    <!-- Tabel Wallets -->
+                    <div class="bg-white rounded-lg shadow overflow-x-auto">
+                        <!-- TODO: Buat tabel untuk 'wallets' dan 'wallet_transactions' -->
+                        <p class="p-6 text-gray-500">[Placeholder untuk melihat saldo wallet (users & fans) dan histori redeem]</p>
+                    </div>
+                </div>
+                
+                <!-- ===== PAGE: MANAGE FANS ===== -->
+                <div id="page-fans" class="page-content hidden">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Manage Fans</h1>
+                    <!-- Tabel Fans -->
+                    <div class="bg-white rounded-lg shadow overflow-x-auto">
+                        <!-- TODO: Buat tabel untuk 'fans' -->
+                        <p class="p-6 text-gray-500">[Placeholder tabel untuk semua fans yang terdaftar]</p>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE: PLATFORM PAYMENTS ===== -->
+                <div id="page-platform-channels" class="page-content hidden">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Platform Payment Channels</h1>
+                    <!-- Tabel Platform Channels -->
+                    <div class="bg-white rounded-lg shadow overflow-x-auto">
+                        <!-- TODO: Buat tabel untuk 'payment_channels' WHERE project_id = '1' -->
+                        <p class="p-6 text-gray-500">[Placeholder tabel untuk mengelola channel pembayaran milik platform (IDR & USD)]</p>
+                    </div>
+                </div>
+
+                <!-- ===== PAGE: SETTINGS ===== -->
+                <div id="page-settings" class="page-content hidden">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Website Settings</h1>
+                    <!-- Form Pengaturan -->
+                    <div class="bg-white rounded-lg shadow p-6 max-w-2xl">
+                        <!-- TODO: Fetch data 'admin_settings' dan buat fungsi Simpan -->
+                        <form id="form-settings" class="space-y-6">
+                            <!-- Kurs Mata Uang -->
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900">Kurs & Biaya</h3>
+                                <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="setting-usd-buy" class="block text-sm font-medium text-gray-700">Kurs Beli USD (Platform Jual)</label>
+                                        <input type="number" id="setting-usd-buy" value="17500" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <p class="mt-1 text-xs text-gray-500">Harga 1 USD/USDT saat fans/kreator membeli dalam IDR.</p>
+                                    </div>
+                                    <div>
+                                        <label for="setting-usd-sell" class="block text-sm font-medium text-gray-700">Kurs Jual USD (Platform Beli)</label>
+                                        <input type="number" id="setting-usd-sell" value="16000" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <p class="mt-1 text-xs text-gray-500">Harga 1 USD/USDT saat platform membeli (redeem) dari wallet.</p>
+                                    </div>
+                                    <div>
+                                        <label for="setting-fee" class="block text-sm font-medium text-gray-700">Platform Fee (%)</label>
+                                        <input type="number" step="0.1" id="setting-fee" value="5.0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- API Keys CoinPayments -->
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900">API Keys (CoinPayments)</h3>
+                                <div class="mt-4 space-y-4">
+                                    <div>
+                                        <label for="setting-cp-merchant" class="block text-sm font-medium text-gray-700">CoinPayments Merchant ID</label>
+                                        <input type="text" id="setting-cp-merchant" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    </div>
+                                    <div>
+                                        <label for="setting-cp-secret" class="block text-sm font-medium text-gray-700">CoinPayments IPN Secret</label>
+                                        <input type="password" id="setting-cp-secret" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tombol Simpan -->
+                            <div class="pt-4 border-t border-gray-200">
+                                <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">
+                                    Save Settings
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+            </div> <!-- Akhir .p-6 -->
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inisialisasi Ikon Lucide
+            lucide.createIcons();
+
+            // --- Logika Navigasi SPA Sederhana ---
+            const navLinks = document.querySelectorAll('.nav-link');
+            const pageContents = document.querySelectorAll('.page-content');
+            const sidebar = document.getElementById('sidebar');
+            const menuToggle = document.getElementById('menu-toggle');
+
+            // Fungsi untuk mengubah halaman
+            function changePage(pageId) {
+                // Sembunyikan semua halaman
+                pageContents.forEach(page => {
+                    page.classList.add('hidden');
+                });
+                
+                // Tampilkan halaman yang dituju
+                const targetPage = document.getElementById(pageId);
+                if (targetPage) {
+                    targetPage.classList.remove('hidden');
+                }
+
+                // Update status 'active' di link navigasi
+                navLinks.forEach(link => {
+                    if (link.dataset.page === pageId) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            // Tambahkan event listener ke setiap link navigasi
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const pageId = link.dataset.page;
+                    changePage(pageId);
+                    
+                    // Di mobile, tutup sidebar setelah klik
+                    if (window.innerWidth < 768) {
+                        sidebar.classList.add('-translate-x-full');
+                    }
+                });
+            });
+            
+            // --- Logika Menu Toggle Mobile ---
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('-translate-x-full');
+            });
+            
+            // --- Logika Pengisian Data (Contoh) ---
+            // Di aplikasi nyata, Anda akan memanggil API di sini
+            
+            // TODO: Panggil API (cth: /api/admin/stats) untuk mengisi dashboard
+            // fetch('/api/admin/stats', { headers: { /* ... auth */ }})
+            //     .then(res => res.json())
+            //     .then(data => {
+            //         document.getElementById('stat-total-users').textContent = data.totalUsers;
+            //         document.getElementById('stat-revenue-idr').textContent = `Rp ${data.revenueIdr}`;
+            //         // ... dst
+            //     });
+
+            // TODO: Panggil API untuk mengisi tabel Users
+            // fetch('/api/admin/users') ...
+            
+            // TODO: Panggil API untuk mengisi form Settings
+            // fetch('/api/admin/settings') ...
+
+            // TODO: Tambahkan event listener untuk 'Save Settings'
+            document.getElementById('form-settings').addEventListener('submit', (e) => {
+                e.preventDefault();
+                alert('Menyimpan pengaturan... (Logika API belum terimplementasi)');
+                // Ambil data dari form
+                // const settingsData = {
+                //     USD_BUY_RATE_IDR: document.getElementById('setting-usd-buy').value,
+                //     // ... dst
+                // };
+                // fetch('/api/admin/settings', { method: 'POST', body: JSON.stringify(settingsData), ... })
+            });
+            
+        });
+    </script>
+    
+    <!-- CSS untuk Nav Link (tidak bisa di-inline oleh Tailwind) -->
+    <style>
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem; /* 12px 24px */
+            font-size: 0.95rem; /* Sedikit lebih kecil dari default */
+            font-weight: 500;
+            color: #4b5563; /* text-gray-600 */
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link:hover {
+            background-color: #f9fafb; /* bg-gray-50 */
+            color: #1f2937; /* text-gray-800 */
+        }
+        .nav-link.active {
+            background-color: #eff6ff; /* bg-blue-50 */
+            color: #2563eb; /* text-blue-600 */
+            border-right: 3px solid #2563eb; /* Border biru di kanan */
+        }
+        .nav-link svg {
+            width: 1.15rem; /* 18px */
+            height: 1.15rem; /* 18px */
+            margin-right: 0.75rem; /* 12px */
+            flex-shrink: 0;
+        }
+    </style>
+</body>
+</html>
