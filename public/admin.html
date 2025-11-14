@@ -4,34 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
-    <!-- Muat Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Muat Lucide Icons -->
     <script src="https://unpkg.com/lucide-dev@0.395.0"></script>
     
     <style>
-        /* Menggunakan font Inter */
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        /* Mengimpor font Inter dari Google Fonts */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        /* Custom scrollbar (opsional, tapi membuat 'ciamik') */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+        /* Style untuk modal backdrop */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
         }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
+        /* Loading spinner */
+        .loader {
+            border-top-color: #3498db;
+            animation: spin 1s linear infinite;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body class="bg-gray-100 antialiased">
+
+    <!-- Notifikasi Toast (untuk feedback) -->
+    <div id="toast-notification" class="hidden fixed top-5 right-5 z-50 p-4 rounded-lg shadow-lg text-white">
+        <span id="toast-message"></span>
+    </div>
 
     <!-- Container Utama: Sidebar + Content -->
     <div class="flex h-screen overflow-hidden">
@@ -44,7 +46,7 @@
             </div>
 
             <!-- Menu Navigasi -->
-            <nav class="mt-4">
+            <nav class="mt-4 overflow-y-auto h-[calc(100%-150px)]">
                 <a href="#" class="nav-link active" data-page="page-dashboard">
                     <i data-lucide="layout-dashboard"></i>
                     <span>Dashboard</span>
@@ -53,28 +55,10 @@
                     <i data-lucide="users"></i>
                     <span>Manage Users</span>
                 </a>
-                <a href="#" class="nav-link" data-page="page-projects">
-                    <i data-lucide="briefcase"></i>
-                    <span>All Projects</span>
-                </a>
-                <a href="#" class="nav-link" data-page="page-transactions">
-                    <i data-lucide="arrow-left-right"></i>
-                    <span>All Transactions</span>
-                </a>
                 <a href="#" class="nav-link" data-page="page-gifts-store">
                     <i data-lucide="gift"></i>
                     <span>Gifts Store</span>
                 </a>
-                <a href="#" class="nav-link" data-page="page-wallets">
-                    <i data-lucide="wallet"></i>
-                    <span>Wallets & Redeem</span>
-                </a>
-                 <a href="#" class="nav-link" data-page="page-fans">
-                    <i data-lucide="heart"></i>
-                    <span>Manage Fans</span>
-                </a>
-
-                <!-- Navigasi Baru untuk Blog & Pages -->
                 <a href="#" class="nav-link" data-page="page-blog-posts">
                     <i data-lucide="file-text"></i>
                     <span>Blog Posts</span>
@@ -91,8 +75,6 @@
                     <i data-lucide="file-spreadsheet"></i>
                     <span>Manage Pages</span>
                 </a>
-                <!-- Akhir Navigasi Baru -->
-
                 <a href="#" class="nav-link" data-page="page-platform-channels">
                     <i data-lucide="credit-card"></i>
                     <span>Platform Payments</span>
@@ -101,14 +83,34 @@
                     <i data-lucide="settings"></i>
                     <span>Settings</span>
                 </a>
-                
-                <div class="mt-8 p-4">
-                    <a href="/api/logout" class="flex w-full items-center justify-center space-x-2 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
-                        <i data-lucide="log-out" class="w-4 h-4"></i>
-                        <span>Logout</span>
-                    </a>
-                </div>
+                <!-- Placeholder (bisa ditambahkan nanti) -->
+                <!-- 
+                <a href="#" class="nav-link" data-page="page-projects">
+                    <i data-lucide="briefcase"></i>
+                    <span>All Projects</span>
+                </a>
+                <a href="#" class="nav-link" data-page="page-transactions">
+                    <i data-lucide="arrow-left-right"></i>
+                    <span>All Transactions</span>
+                </a>
+                <a href="#" class="nav-link" data-page="page-wallets">
+                    <i data-lucide="wallet"></i>
+                    <span>Wallets & Redeem</span>
+                </a>
+                 <a href="#" class="nav-link" data-page="page-fans">
+                    <i data-lucide="heart"></i>
+                    <span>Manage Fans</span>
+                </a>
+                -->
             </nav>
+            
+            <!-- Tombol Logout di bawah -->
+            <div class="absolute bottom-0 left-0 w-full p-4 border-t border-gray-200">
+                <a href="/api/logout" class="flex w-full items-center justify-center space-x-2 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
         </aside>
 
         <!-- Main Content Area -->
@@ -119,10 +121,10 @@
                 <button id="menu-toggle" class="text-gray-500 focus:outline-none md:hidden">
                     <i data-lucide="menu" class="w-6 h-6"></i>
                 </button>
-                <div class="text-lg font-semibold text-gray-700">Selamat Datang, Admin!</div>
-                <!-- Placeholder Profil Admin -->
+                <div id="page-title-header" class="text-lg font-semibold text-gray-700">Dashboard</div>
+                <!-- Profil Admin -->
                 <div class="flex items-center space-x-2">
-                    <span class="text-sm font-medium">Admin</span>
+                    <span id="admin-name-display" class="text-sm font-medium">Admin</span>
                     <img class="w-8 h-8 rounded-full" src="https://placehold.co/100x100/E2E8F0/475569?text=A" alt="Admin">
                 </div>
             </header>
@@ -133,166 +135,162 @@
                 <!-- ===== PAGE: DASHBOARD (Default) ===== -->
                 <div id="page-dashboard" class="page-content">
                     <h1 class="text-3xl font-bold text-gray-800 mb-6">Dashboard</h1>
-                    <!-- Grid Kartu Statistik -->
                     <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-                        <!-- Kartu: Total Users -->
                         <div class="bg-white p-5 rounded-lg shadow flex items-center justify-between">
                             <div>
                                 <div class="text-sm font-medium text-gray-500">Total Users</div>
-                                <div id="stat-total-users" class="text-3xl font-bold text-gray-800">1,234</div>
-                                <div class="text-sm text-green-500">+12% bulan ini</div>
+                                <div id="stat-total-users" class="text-3xl font-bold text-gray-800">0</div>
                             </div>
-                            <div class="p-3 bg-blue-100 text-blue-600 rounded-full">
-                                <i data-lucide="users" class="w-6 h-6"></i>
-                            </div>
+                            <div class="p-3 bg-blue-100 text-blue-600 rounded-full"><i data-lucide="users" class="w-6 h-6"></i></div>
                         </div>
-                        <!-- Kartu: Total Revenue (IDR) -->
                         <div class="bg-white p-5 rounded-lg shadow flex items-center justify-between">
                             <div>
                                 <div class="text-sm font-medium text-gray-500">Revenue (IDR)</div>
-                                <div id="stat-revenue-idr" class="text-3xl font-bold text-gray-800">Rp 15.2M</div>
-                                <div class="text-sm text-green-500">+8.5%</div>
+                                <div id="stat-revenue-idr" class="text-3xl font-bold text-gray-800">Rp 0</div>
                             </div>
-                            <div class="p-3 bg-green-100 text-green-600 rounded-full">
-                                <i data-lucide="trending-up" class="w-6 h-6"></i>
-                            </div>
+                            <div class="p-3 bg-green-100 text-green-600 rounded-full"><i data-lucide="trending-up" class="w-6 h-6"></i></div>
                         </div>
-                        <!-- Kartu: Total Revenue (USD) -->
                         <div class="bg-white p-5 rounded-lg shadow flex items-center justify-between">
                             <div>
                                 <div class="text-sm font-medium text-gray-500">Revenue (USD)</div>
-                                <div id="stat-revenue-usd" class="text-3xl font-bold text-gray-800">$ 1,850</div>
-                                <div class="text-sm text-green-500">+5.2%</div>
+                                <div id="stat-revenue-usd" class="text-3xl font-bold text-gray-800">$ 0</div>
                             </div>
-                            <div class="p-3 bg-yellow-100 text-yellow-600 rounded-full">
-                                <i data-lucide="dollar-sign" class="w-6 h-6"></i>
-                            </div>
+                            <div class="p-3 bg-yellow-100 text-yellow-600 rounded-full"><i data-lucide="dollar-sign" class="w-6 h-6"></i></div>
                         </div>
-                        <!-- Kartu: Gifts Redeemed -->
                         <div class="bg-white p-5 rounded-lg shadow flex items-center justify-between">
                             <div>
                                 <div class="text-sm font-medium text-gray-500">Gifts Redeemed</div>
-                                <div id="stat-gifts-redeemed" class="text-3xl font-bold text-gray-800">432</div>
-                                <div class="text-sm text-red-500">-2% (vs kemarin)</div>
+                                <div id="stat-gifts-redeemed" class="text-3xl font-bold text-gray-800">0</div>
                             </div>
-                            <div class="p-3 bg-indigo-100 text-indigo-600 rounded-full">
-                                <i data-lucide="gift" class="w-6 h-6"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Chart & Activity -->
-                    <div class="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div class="lg:col-span-2 bg-white p-6 rounded-lg shadow">
-                            <h3 class="text-lg font-semibold mb-4">Grafik Pendapatan</h3>
-                            <div class="h-64 flex items-center justify-center text-gray-400">
-                                <!-- TODO: Ganti dengan library chart (cth: Chart.js) -->
-                                [Placeholder untuk Grafik]
-                            </div>
-                        </div>
-                        <div class="bg-white p-6 rounded-lg shadow">
-                            <h3 class="text-lg font-semibold mb-4">Aktivitas Terbaru</h3>
-                            <div class="space-y-4">
-                                <!-- TODO: Fetch data aktivitas terbaru -->
-                                <div class="flex items-center space-x-3">
-                                    <div class="p-2 bg-green-100 text-green-600 rounded-full"><i data-lucide="dollar-sign" class="w-4 h-4"></i></div>
-                                    <p class="text-sm">User 'johndoe' membeli Gift (Rp 50.000)</p>
-                                </div>
-                                <div class="flex items-center space-x-3">
-                                    <div class="p-2 bg-blue-100 text-blue-600 rounded-full"><i data-lucide="user-plus" class="w-4 h-4"></i></div>
-                                    <p class="text-sm">User baru 'kreator_hebat' mendaftar</p>
-                                </div>
-                                <div class="flex items-center space-x-3">
-                                    <div class="p-2 bg-indigo-100 text-indigo-600 rounded-full"><i data-lucide="gift" class="w-4 h-4"></i></div>
-                                    <p class="text-sm">Gift 'Kopi' di-redeem (Rp 9.000)</p>
-                                </div>
-                            </div>
+                            <div class="p-3 bg-indigo-100 text-indigo-600 rounded-full"><i data-lucide="gift" class="w-6 h-6"></i></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ===== PAGE: MANAGE FANS ===== -->
-                <div id="page-fans" class="page-content hidden">
-                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Manage Fans</h1>
-                    <!-- Tabel Fans -->
+                <!-- ===== PAGE: MANAGE USERS ===== -->
+                <div id="page-users" class="page-content hidden">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Manage Users</h1>
                     <div class="bg-white rounded-lg shadow overflow-x-auto">
-                        <!-- TODO: Buat tabel untuk 'fans' -->
-                        <p class="p-6 text-gray-500">[Placeholder tabel untuk semua fans yang terdaftar]</p>
+                        <table class="w-full min-w-max">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Name</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Email</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Role</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Status</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body" class="divide-y divide-gray-200">
+                                <!-- Data diisi oleh JS -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
+                <!-- ===== PAGE: GIFTS STORE ===== -->
+                <div id="page-gifts-store" class="page-content hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-3xl font-bold text-gray-800">Gifts Store</h1>
+                        <button id="btn-add-gift" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 flex items-center space-x-2">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>Add New Gift</span>
+                        </button>
+                    </div>
+                    <div class="bg-white rounded-lg shadow overflow-x-auto">
+                        <table class="w-full min-w-max">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Name (ID)</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Price (IDR)</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Price (USD)</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Redeem (IDR)</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Status</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gifts-table-body" class="divide-y divide-gray-200">
+                                <!-- Data diisi oleh JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
                 <!-- ===== PAGE: BLOG POSTS ===== -->
                 <div id="page-blog-posts" class="page-content hidden">
                     <div class="flex justify-between items-center mb-6">
                         <h1 class="text-3xl font-bold text-gray-800">Blog Posts</h1>
-                        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 flex items-center space-x-2">
+                        <button id="btn-add-post" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 flex items-center space-x-2">
                             <i data-lucide="plus" class="w-4 h-4"></i>
                             <span>Add New Post</span>
                         </button>
                     </div>
-                    <!-- Tabel Blog Posts -->
                     <div class="bg-white rounded-lg shadow overflow-x-auto">
                         <table class="w-full min-w-max">
                             <thead class="bg-gray-50">
                                 <tr>
                                     <th class="p-4 text-left text-sm font-semibold text-gray-600">Title</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Slug</th>
                                     <th class="p-4 text-left text-sm font-semibold text-gray-600">Status</th>
-                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Published</th>
                                     <th class="p-4 text-left text-sm font-semibold text-gray-600">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                <!-- TODO: Fetch data 'blog_posts' -->
-                                <tr>
-                                    <td class="p-4">Update Sistem v1.1</td>
-                                    <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full">published</span></td>
-                                    <td class="p-4">14 Nov 2025</td>
-                                    <td class="p-4 space-x-2">
-                                        <button class="text-blue-600 hover:text-blue-800">Edit</button>
-                                        <button class="text-red-600 hover:text-red-800">Delete</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4">Panduan Redeem Gifts</td>
-                                    <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-700 rounded-full">draft</span></td>
-                                    <td class="p-4">-</td>
-                                    <td class="p-4 space-x-2">
-                                        <button class="text-blue-600 hover:text-blue-800">Edit</button>
-                                        <button class="text-red-600 hover:text-red-800">Delete</button>
-                                    </td>
-                                </tr>
+                            <tbody id="posts-table-body" class="divide-y divide-gray-200">
+                                <!-- Data diisi oleh JS -->
                             </tbody>
                         </table>
                     </div>
-                    <!-- TODO: Modal/Form untuk Add/Edit Post. Formnya harus ada:
-                         title, slug, content (textarea), 
-                         featured_image_url (text input, cth: /images/nama-file.png), 
-                         status (select), categories (checkboxes), tags (text input) -->
                 </div>
 
                 <!-- ===== PAGE: BLOG CATEGORIES ===== -->
                 <div id="page-blog-categories" class="page-content hidden">
                     <h1 class="text-3xl font-bold text-gray-800 mb-6">Blog Categories</h1>
-                    <!-- TODO: Buat UI untuk CRUD Categories -->
-                    <p class="p-6 bg-white rounded-lg shadow text-gray-500">[Placeholder untuk CRUD (Create, Read, Update, Delete) Kategori Blog]</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Add New Category</h3>
+                            <form id="form-add-category" class="flex space-x-2">
+                                <input type="text" id="category-name-input" placeholder="Category Name" class="flex-1 rounded-md border-gray-300 shadow-sm" required>
+                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Add</button>
+                            </form>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Existing Categories</h3>
+                            <div id="categories-list" class="space-y-2">
+                                <!-- Data diisi oleh JS -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- ===== PAGE: BLOG TAGS ===== -->
                 <div id="page-blog-tags" class="page-content hidden">
                     <h1 class="text-3xl font-bold text-gray-800 mb-6">Blog Tags</h1>
-                    <!-- TODO: Buat UI untuk CRUD Tags -->
-                    <p class="p-6 bg-white rounded-lg shadow text-gray-500">[Placeholder untuk CRUD (Create, Read, Update, Delete) Tags Blog]</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Add New Tag</h3>
+                            <form id="form-add-tag" class="flex space-x-2">
+                                <input type="text" id="tag-name-input" placeholder="Tag Name" class="flex-1 rounded-md border-gray-300 shadow-sm" required>
+                                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Add</button>
+                            </form>
+                        </div>
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="text-lg font-semibold mb-4">Existing Tags</h3>
+                            <div id="tags-list" class="space-y-2">
+                                <!-- Data diisi oleh JS -->
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- ===== PAGE: MANAGE PAGES ===== -->
                 <div id="page-pages" class="page-content hidden">
                     <div class="flex justify-between items-center mb-6">
                         <h1 class="text-3xl font-bold text-gray-800">Manage Pages</h1>
-                        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 flex items-center space-x-2">
+                        <button id="btn-add-page" class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 flex items-center space-x-2">
                             <i data-lucide="plus" class="w-4 h-4"></i>
                             <span>Add New Page</span>
                         </button>
                     </div>
-                    <!-- Tabel Pages -->
                     <div class="bg-white rounded-lg shadow overflow-x-auto">
                         <table class="w-full min-w-max">
                             <thead class="bg-gray-50">
@@ -303,88 +301,56 @@
                                     <th class="p-4 text-left text-sm font-semibold text-gray-600">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                <!-- TODO: Fetch data 'pages' -->
-                                <tr>
-                                    <td class="p-4">FAQ</td>
-                                    <td class="p-4">faq</td>
-                                    <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full">published</span></td>
-                                    <td class="p-4 space-x-2">
-                                        <button class="text-blue-600 hover:text-blue-800">Edit</button>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="p-4">Guides</td>
-                                    <td class="p-4">guides</td>
-                                    <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full">published</span></td>
-                                    <td class="p-4 space-x-2">
-                                        <button class="text-blue-600 hover:text-blue-800">Edit</button>
-                                    </td>
-                                </tr>
+                            <tbody id="pages-table-body" class="divide-y divide-gray-200">
+                                <!-- Data diisi oleh JS -->
                             </tbody>
                         </table>
                     </div>
-                    <!-- TODO: Modal/Form untuk Add/Edit Page. Formnya harus ada:
-                         title, slug, content (textarea), 
-                         template_type (select: standard, faq, guides), 
-                         status (select) -->
                 </div>
-
 
                 <!-- ===== PAGE: PLATFORM PAYMENTS ===== -->
                 <div id="page-platform-channels" class="page-content hidden">
                     <h1 class="text-3xl font-bold text-gray-800 mb-6">Platform Payment Channels</h1>
-                    <!-- Tabel Platform Channels -->
                     <div class="bg-white rounded-lg shadow overflow-x-auto">
-                        <!-- TODO: Buat tabel untuk 'payment_channels' WHERE project_id = '1' -->
-                        <p class="p-6 text-gray-500">[Placeholder tabel untuk mengelola channel pembayaran milik platform (IDR & USD)]</p>
+                        <p class="p-6 text-gray-500">[Placeholder untuk CRUD Channel Pembayaran Platform]</p>
                     </div>
                 </div>
 
                 <!-- ===== PAGE: SETTINGS ===== -->
                 <div id="page-settings" class="page-content hidden">
                     <h1 class="text-3xl font-bold text-gray-800 mb-6">Website Settings</h1>
-                    <!-- Form Pengaturan -->
                     <div class="bg-white rounded-lg shadow p-6 max-w-2xl">
-                        <!-- TODO: Fetch data 'admin_settings' dan buat fungsi Simpan -->
                         <form id="form-settings" class="space-y-6">
-                            <!-- Kurs Mata Uang -->
                             <div>
                                 <h3 class="text-lg font-medium text-gray-900">Kurs & Biaya</h3>
                                 <div class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label for="setting-usd-buy" class="block text-sm font-medium text-gray-700">Kurs Beli USD (Platform Jual)</label>
-                                        <input type="number" id="setting-usd-buy" value="17500" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                        <p class="mt-1 text-xs text-gray-500">Harga 1 USD/USDT saat fans/kreator membeli dalam IDR.</p>
+                                        <input type="number" id="setting-usd-buy" name="USD_BUY_RATE_IDR" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                     </div>
                                     <div>
                                         <label for="setting-usd-sell" class="block text-sm font-medium text-gray-700">Kurs Jual USD (Platform Beli)</label>
-                                        <input type="number" id="setting-usd-sell" value="16000" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                        <p class="mt-1 text-xs text-gray-500">Harga 1 USD/USDT saat platform membeli (redeem) dari wallet.</p>
+                                        <input type="number" id="setting-usd-sell" name="USD_SELL_RATE_IDR" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                     </div>
                                     <div>
                                         <label for="setting-fee" class="block text-sm font-medium text-gray-700">Platform Fee (%)</label>
-                                        <input type="number" step="0.1" id="setting-fee" value="5.0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <input type="number" step="0.1" id="setting-fee" name="PLATFORM_FEE_PERCENT" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- API Keys CoinPayments -->
                             <div>
                                 <h3 class="text-lg font-medium text-gray-900">API Keys (CoinPayments)</h3>
                                 <div class="mt-4 space-y-4">
                                     <div>
                                         <label for="setting-cp-merchant" class="block text-sm font-medium text-gray-700">CoinPayments Merchant ID</label>
-                                        <input type="text" id="setting-cp-merchant" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <input type="text" id="setting-cp-merchant" name="COINPAYMENTS_MERCHANT_ID" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                     </div>
                                     <div>
                                         <label for="setting-cp-secret" class="block text-sm font-medium text-gray-700">CoinPayments IPN Secret</label>
-                                        <input type="password" id="setting-cp-secret" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                        <input type="password" id="setting-cp-secret" name="COINPAYMENTS_IPN_SECRET" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Tombol Simpan -->
                             <div class="pt-4 border-t border-gray-200">
                                 <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700">
                                     Save Settings
@@ -398,89 +364,869 @@
         </main>
     </div>
 
+    <!-- ===== MODALS (Ditempatkan di akhir body) ===== -->
+
+    <!-- Modal: Edit User -->
+    <div id="modal-edit-user" class="modal hidden fixed z-40 inset-0 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="modal-backdrop fixed inset-0"></div>
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md z-50 p-6">
+                <h3 class="text-xl font-semibold mb-4">Edit User</h3>
+                <form id="form-edit-user">
+                    <input type="hidden" id="user-edit-id">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium">Name</label>
+                            <input type="text" id="user-edit-name" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100" readonly>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium">Email</label>
+                            <input type="email" id="user-edit-email" class="mt-1 block w-full rounded-md border-gray-300 bg-gray-100" readonly>
+                        </div>
+                        <div>
+                            <label for="user-edit-role" class="block text-sm font-medium">Role</label>
+                            <select id="user-edit-role" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                <option value="member">member</option>
+                                <option value="admin">admin</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="user-edit-status" class="block text-sm font-medium">Status</label>
+                            <select id="user-edit-status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                <option value="active">active</option>
+                                <option value="suspended">suspended</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" class="btn-cancel px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add/Edit Gift -->
+    <div id="modal-form-gift" class="modal hidden fixed z-40 inset-0 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="modal-backdrop fixed inset-0"></div>
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-lg z-50 p-6">
+                <h3 id="gift-modal-title" class="text-xl font-semibold mb-4">Add New Gift</h3>
+                <form id="form-gift" class="space-y-4">
+                    <input type="hidden" id="gift-edit-id">
+                    <div>
+                        <label for="gift-name-id" class="block text-sm font-medium">Name (ID Unik)</label>
+                        <input type="text" id="gift-name-id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="gift-name-en" class="block text-sm font-medium">Name (EN)</label>
+                            <input type="text" id="gift-name-en" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        </div>
+                        <div>
+                            <label for="gift-name-id-lang" class="block text-sm font-medium">Name (ID)</label>
+                            <input type="text" id="gift-name-id-lang" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="gift-image-url" class="block text-sm font-medium">Image URL</label>
+                        <input type="text" id="gift-image-url" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="Contoh: /images/kopi.png">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="gift-price-idr" class="block text-sm font-medium">Price (IDR)</label>
+                            <input type="number" id="gift-price-idr" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        </div>
+                        <div>
+                            <label for="gift-redeem-idr" class="block text-sm font-medium">Redeem Value (IDR)</label>
+                            <input type="number" id="gift-redeem-idr" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="gift-price-usd" class="block text-sm font-medium">Price (USD Cents)</label>
+                            <input type="number" id="gift-price-usd" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        </div>
+                        <div>
+                            <label for="gift-redeem-usd" class="block text-sm font-medium">Redeem Value (USD Cents)</label>
+                            <input type="number" id="gift-redeem-usd" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="gift-is-active" class="block text-sm font-medium">Status</label>
+                        <select id="gift-is-active" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <option value="1">Active</option>
+                            <option value="0">Inactive</option>
+                        </select>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" class="btn-cancel px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Gift</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Add/Edit Post -->
+    <div id="modal-form-post" class="modal hidden fixed z-40 inset-0 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="modal-backdrop fixed inset-0"></div>
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl z-50 p-6">
+                <h3 id="post-modal-title" class="text-xl font-semibold mb-4">Add New Post</h3>
+                <form id="form-post" class="space-y-4 max-h-[80vh] overflow-y-auto pr-2">
+                    <input type="hidden" id="post-edit-id">
+                    <div>
+                        <label for="post-title" class="block text-sm font-medium">Title</label>
+                        <input type="text" id="post-title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                    </div>
+                    <div>
+                        <label for="post-slug" class="block text-sm font-medium">Slug (auto-generated if empty)</label>
+                        <input type="text" id="post-slug" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                    </div>
+                    <div>
+                        <label for="post-image-url" class="block text-sm font-medium">Featured Image URL</label>
+                        <input type="text" id="post-image-url" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="/images/my-post.png">
+                    </div>
+                    <div>
+                        <label for="post-content" class="block text-sm font-medium">Content (Markdown supported)</label>
+                        <textarea id="post-content" rows="10" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+                    </div>
+                    <div>
+                        <label for="post-status" class="block text-sm font-medium">Status</label>
+                        <select id="post-status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <option value="draft">Draft</option>
+                            <option value="published">Published</option>
+                        </select>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" class="btn-cancel px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Post</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Add/Edit Page -->
+    <div id="modal-form-page" class="modal hidden fixed z-40 inset-0 overflow-y-auto">
+         <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="modal-backdrop fixed inset-0"></div>
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl z-50 p-6">
+                <h3 id="page-modal-title" class="text-xl font-semibold mb-4">Add New Page</h3>
+                <form id="form-page" class="space-y-4 max-h-[80vh] overflow-y-auto pr-2">
+                    <input type="hidden" id="page-edit-id">
+                    <div>
+                        <label for="page-title" class="block text-sm font-medium">Title</label>
+                        <input type="text" id="page-title" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                    </div>
+                    <div>
+                        <label for="page-slug" class="block text-sm font-medium">Slug</label>
+                        <input type="text" id="page-slug" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
+                    </div>
+                    <div>
+                        <label for="page-template" class="block text-sm font-medium">Template</label>
+                        <select id="page-template" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <option value="standard">Standard</option>
+                            <option value="faq">FAQ</option>
+                            <option value="guides">Guides</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="page-content" class="block text-sm font-medium">Content (HTML/Markdown)</label>
+                        <textarea id="page-content" rows="10" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
+                    </div>
+                    <div>
+                        <label for="page-status" class="block text-sm font-medium">Status</label>
+                        <select id="page-status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                            <option value="draft">Draft</option>
+                            <option value="published">Published</option>
+                        </select>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button type="button" class="btn-cancel px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancel</button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Page</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal: Delete Confirmation -->
+    <div id="modal-delete-confirm" class="modal hidden fixed z-40 inset-0 overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <div class="modal-backdrop fixed inset-0"></div>
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md z-50 p-6">
+                <h3 class="text-xl font-semibold mb-2">Confirm Deletion</h3>
+                <p id="delete-confirm-message">Are you sure you want to delete this item? This action cannot be undone.</p>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" class="btn-cancel px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Cancel</button>
+                    <button id="btn-delete-confirm" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden fixed inset-0 z-50 bg-black/20 items-center justify-center">
+        <div class="loader w-12 h-12 rounded-full border-4 border-gray-200"></div>
+    </div>
+
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Inisialisasi Ikon Lucide
             lucide.createIcons();
 
-            // --- Logika Navigasi SPA Sederhana ---
+            // === A. SELEKTOR UTAMA ===
             const navLinks = document.querySelectorAll('.nav-link');
             const pageContents = document.querySelectorAll('.page-content');
             const sidebar = document.getElementById('sidebar');
             const menuToggle = document.getElementById('menu-toggle');
+            const pageTitleHeader = document.getElementById('page-title-header');
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const toast = document.getElementById('toast-notification');
+            const toastMessage = document.getElementById('toast-message');
 
-            // Fungsi untuk mengubah halaman
-            function changePage(pageId) {
-                // Sembunyikan semua halaman
-                pageContents.forEach(page => {
-                    page.classList.add('hidden');
-                });
+            // Variabel Global Sederhana (untuk menyimpan data)
+            let currentAdmin = null;
+            let currentOpenModal = null;
+            let deleteCallback = null;
+            
+            // Formatters
+            const fDashboardIDR = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
+            const fDashboardUSD = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+            const fTable = new Intl.NumberFormat('id-ID');
+
+            // === B. FUNGSI UTILITAS (API, Modal, Toast) ===
+
+            /**
+             * Menampilkan notifikasi toast
+             * @param {string} message - Pesan yang ditampilkan
+             * @param {boolean} [isError=false] - Tipe notifikasi (sukses/error)
+             */
+            function showToast(message, isError = false) {
+                toastMessage.textContent = message;
+                toast.className = `fixed top-5 right-5 z-50 p-4 rounded-lg shadow-lg text-white ${isError ? 'bg-red-500' : 'bg-green-500'}`;
+                toast.classList.remove('hidden');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 3000);
+            }
+
+            /**
+             * Wrapper Fetch API
+             * @param {string} url - URL endpoint
+             * @param {object} [options={}] - Opsi Fetch (method, body, dll)
+             */
+            async function apiFetch(url, options = {}) {
+                loadingOverlay.classList.remove('hidden');
+                try {
+                    const response = await fetch(url, options);
+                    
+                    if (response.status === 401) { // Session habis / tidak terautentikasi
+                        window.location.href = '/login.html';
+                        return;
+                    }
+
+                    const data = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Terjadi kesalahan API');
+                    }
+                    
+                    return data;
+                } catch (error) {
+                    showToast(error.message, true);
+                    throw error; // Lempar error agar promise chain berhenti
+                } finally {
+                    loadingOverlay.classList.add('hidden');
+                }
+            }
+
+            /**
+             * Membuka modal
+             * @param {string} modalId - ID dari modal yang akan dibuka
+             */
+            function openModal(modalId) {
+                currentOpenModal = document.getElementById(modalId);
+                if (currentOpenModal) {
+                    currentOpenModal.classList.remove('hidden');
+                }
+            }
+
+            /**
+             * Menutup modal yang sedang terbuka
+             */
+            function closeModal() {
+                if (currentOpenModal) {
+                    currentOpenModal.classList.add('hidden');
+                    currentOpenModal = null;
+                }
+            }
+
+            // Tambahkan event listener untuk tombol cancel dan backdrop
+            document.querySelectorAll('.btn-cancel, .modal-backdrop').forEach(el => {
+                el.addEventListener('click', closeModal);
+            });
+            
+            /**
+             * Membuka modal konfirmasi hapus
+             * @param {string} message - Pesan konfirmasi
+             * @param {function} callback - Fungsi yang dijalankan saat "Delete" diklik
+             */
+            function openDeleteConfirm(message, callback) {
+                document.getElementById('delete-confirm-message').textContent = message;
+                deleteCallback = callback;
+                openModal('modal-delete-confirm');
+            }
+            
+            // Event listener untuk tombol konfirmasi hapus
+            document.getElementById('btn-delete-confirm').addEventListener('click', async () => {
+                if (typeof deleteCallback === 'function') {
+                    await deleteCallback();
+                }
+                closeModal();
+                deleteCallback = null;
+            });
+
+
+            // === C. LOGIKA SPA (NAVIGASI) ===
+
+            function changePage(pageId, pageTitle) {
+                pageContents.forEach(page => page.classList.add('hidden'));
                 
-                // Tampilkan halaman yang dituju
                 const targetPage = document.getElementById(pageId);
                 if (targetPage) {
                     targetPage.classList.remove('hidden');
+                    pageTitleHeader.textContent = pageTitle;
+                    
+                    // Muat data untuk halaman yang dituju
+                    loadPageData(pageId);
                 }
 
-                // Update status 'active' di link navigasi
                 navLinks.forEach(link => {
-                    if (link.dataset.page === pageId) {
-                        link.classList.add('active');
-                    } else {
-                        link.classList.remove('active');
-                    }
+                    link.classList.toggle('active', link.dataset.page === pageId);
                 });
             }
 
-            // Tambahkan event listener ke setiap link navigasi
             navLinks.forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     const pageId = link.dataset.page;
-                    changePage(pageId);
-                    
-                    // Di mobile, tutup sidebar setelah klik
+                    const pageTitle = link.querySelector('span').textContent;
+                    changePage(pageId, pageTitle);
                     if (window.innerWidth < 768) {
                         sidebar.classList.add('-translate-x-full');
                     }
                 });
             });
-            
-            // --- Logika Menu Toggle Mobile ---
+
             menuToggle.addEventListener('click', () => {
                 sidebar.classList.toggle('-translate-x-full');
             });
-            
-            // --- Logika Pengisian Data (Contoh) ---
-            // Di aplikasi nyata, Anda akan memanggil API di sini
-            
-            // TODO: Panggil API (cth: /api/admin/stats) untuk mengisi dashboard
-            // fetch('/api/admin/stats', { headers: { /* ... auth */ }})
-            //     .then(res => res.json())
-            //     .then(data => {
-            //         document.getElementById('stat-total-users').textContent = data.totalUsers;
-            //         document.getElementById('stat-revenue-idr').textContent = `Rp ${data.revenueIdr}`;
-            //         // ... dst
-            //     });
 
-            // TODO: Panggil API untuk mengisi tabel Users
-            // fetch('/api/admin/users') ...
-            
-            // TODO: Panggil API untuk mengisi form Settings
-            // fetch('/api/admin/settings') ...
+            // === D. FUNGSI LOAD DATA PER HALAMAN ===
 
-            // TODO: Tambahkan event listener untuk 'Save Settings'
-            document.getElementById('form-settings').addEventListener('submit', (e) => {
+            async function loadPageData(pageId) {
+                switch (pageId) {
+                    case 'page-dashboard':
+                        await loadDashboardStats();
+                        break;
+                    case 'page-users':
+                        await loadUsers();
+                        break;
+                    case 'page-settings':
+                        await loadSettings();
+                        break;
+                    case 'page-gifts-store':
+                        await loadGifts();
+                        break;
+                    case 'page-blog-posts':
+                        await loadBlogPosts();
+                        break;
+                    case 'page-blog-categories':
+                        await loadBlogCategories();
+                        break;
+                    case 'page-blog-tags':
+                        await loadBlogTags();
+                        break;
+                    case 'page-pages':
+                        await loadPages();
+                        break;
+                }
+            }
+
+            // === E. LOGIKA SPESIFIK PER HALAMAN ===
+
+            // --- Init (Panggilan Pertama) ---
+            async function initializeApp() {
+                try {
+                    currentAdmin = await apiFetch('/api/profile');
+                    document.getElementById('admin-name-display').textContent = currentAdmin.name;
+                    await loadDashboardStats();
+                } catch (error) {
+                    // Penanganan error sudah ada di apiFetch (redirect)
+                }
+            }
+
+            // --- 1. Dashboard ---
+            async function loadDashboardStats() {
+                try {
+                    const data = await apiFetch('/api/admin/stats');
+                    document.getElementById('stat-total-users').textContent = data.totalUsers;
+                    document.getElementById('stat-revenue-idr').textContent = fDashboardIDR.format(data.revenueIdr);
+                    document.getElementById('stat-revenue-usd').textContent = fDashboardUSD.format(data.revenueUsd / 100); // Asumsi USD dalam sen
+                    document.getElementById('stat-gifts-redeemed').textContent = data.giftsRedeemed;
+                } catch (error) {
+                    console.error('Gagal memuat statistik:', error);
+                }
+            }
+
+            // --- 2. Settings ---
+            const settingsForm = document.getElementById('form-settings');
+            
+            async function loadSettings() {
+                try {
+                    const data = await apiFetch('/api/admin/settings');
+                    Object.keys(data).forEach(key => {
+                        const input = settingsForm.elements[key];
+                        if (input) {
+                            input.value = data[key];
+                        }
+                    });
+                } catch (error) {
+                    console.error('Gagal memuat pengaturan:', error);
+                }
+            }
+            
+            settingsForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                alert('Menyimpan pengaturan... (Logika API belum terimplementasi)');
-                // Ambil data dari form
-                // const settingsData = {
-                //     USD_BUY_RATE_IDR: document.getElementById('setting-usd-buy').value,
-                //     // ... dst
-                // };
-                // fetch('/api/admin/settings', { method: 'POST', body: JSON.stringify(settingsData), ... })
+                const formData = new FormData(settingsForm);
+                const data = Object.fromEntries(formData.entries());
+                
+                try {
+                    await apiFetch('/api/admin/settings', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                    });
+                    showToast('Pengaturan berhasil disimpan!');
+                } catch (error) {
+                    console.error('Gagal menyimpan pengaturan:', error);
+                }
+            });
+
+            // --- 3. Manage Users ---
+            const usersTableBody = document.getElementById('users-table-body');
+            const userEditForm = document.getElementById('form-edit-user');
+            let allUsers = [];
+
+            async function loadUsers() {
+                try {
+                    allUsers = await apiFetch('/api/admin/users');
+                    renderUsersTable();
+                } catch (error) {
+                    console.error('Gagal memuat pengguna:', error);
+                }
+            }
+
+            function renderUsersTable() {
+                usersTableBody.innerHTML = '';
+                if (allUsers.length === 0) {
+                    usersTableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Tidak ada data pengguna</td></tr>`;
+                    return;
+                }
+                
+                allUsers.forEach(user => {
+                    const row = `
+                        <tr>
+                            <td class="p-4">${user.name}</td>
+                            <td class="p-4">${user.email}</td>
+                            <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium rounded-full ${user.role === 'admin' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}">${user.role}</span></td>
+                            <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium rounded-full ${user.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${user.status}</span></td>
+                            <td class="p-4 space-x-2">
+                                <button class="btn-edit-user text-blue-600 hover:text-blue-800" data-id="${user.id}">Edit</button>
+                            </td>
+                        </tr>
+                    `;
+                    usersTableBody.innerHTML += row;
+                });
+            }
+
+            usersTableBody.addEventListener('click', (e) => {
+                if (e.target.classList.contains('btn-edit-user')) {
+                    const userId = e.target.dataset.id;
+                    const user = allUsers.find(u => u.id === userId);
+                    document.getElementById('user-edit-id').value = user.id;
+                    document.getElementById('user-edit-name').value = user.name;
+                    document.getElementById('user-edit-email').value = user.email;
+                    document.getElementById('user-edit-role').value = user.role;
+                    document.getElementById('user-edit-status').value = user.status;
+                    openModal('modal-edit-user');
+                }
             });
             
+            userEditForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('user-edit-id').value;
+                const data = {
+                    role: document.getElementById('user-edit-role').value,
+                    status: document.getElementById('user-edit-status').value,
+                };
+                
+                try {
+                    await apiFetch(`/api/admin/users/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                    });
+                    closeModal();
+                    showToast('User berhasil diperbarui!');
+                    await loadUsers(); // Refresh tabel
+                } catch (error) {
+                    console.error('Gagal memperbarui user:', error);
+                }
+            });
+            
+            // --- 4. Gifts Store ---
+            const giftsTableBody = document.getElementById('gifts-table-body');
+            const giftForm = document.getElementById('form-gift');
+            const giftModalTitle = document.getElementById('gift-modal-title');
+            let allGifts = [];
+            
+            async function loadGifts() {
+                try {
+                    allGifts = await apiFetch('/api/admin/gifts-store');
+                    renderGiftsTable();
+                } catch (error) { console.error('Gagal memuat gifts:', error); }
+            }
+            
+            function renderGiftsTable() {
+                giftsTableBody.innerHTML = '';
+                if (allGifts.length === 0) {
+                    giftsTableBody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">Belum ada gift</td></tr>`;
+                    return;
+                }
+                allGifts.forEach(gift => {
+                    const row = `
+                        <tr>
+                            <td class="p-4">${gift.name_id_lang}</td>
+                            <td class="p-4">${fTable.format(gift.price_idr)}</td>
+                            <td class="p-4">${(gift.price_usd_cents / 100).toFixed(2)}</td>
+                            <td class="p-4">${fTable.format(gift.redeem_value_idr)}</td>
+                            <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium rounded-full ${gift.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}">${gift.is_active ? 'Active' : 'Inactive'}</span></td>
+                            <td class="p-4 space-x-2">
+                                <button class="btn-edit-gift text-blue-600 hover:text-blue-800" data-id="${gift.id}">Edit</button>
+                                <button class="btn-delete-gift text-red-600 hover:text-red-800" data-id="${gift.id}">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                    giftsTableBody.innerHTML += row;
+                });
+            }
+
+            document.getElementById('btn-add-gift').addEventListener('click', () => {
+                giftModalTitle.textContent = 'Add New Gift';
+                giftForm.reset();
+                document.getElementById('gift-edit-id').value = '';
+                openModal('modal-form-gift');
+            });
+            
+            giftsTableBody.addEventListener('click', (e) => {
+                if (e.target.classList.contains('btn-edit-gift')) {
+                    const id = e.target.dataset.id;
+                    const gift = allGifts.find(g => g.id === id);
+                    giftModalTitle.textContent = 'Edit Gift';
+                    document.getElementById('gift-edit-id').value = gift.id;
+                    document.getElementById('gift-name-id').value = gift.name_id;
+                    document.getElementById('gift-name-en').value = gift.name_en;
+                    document.getElementById('gift-name-id-lang').value = gift.name_id_lang;
+                    document.getElementById('gift-image-url').value = gift.image_url;
+                    document.getElementById('gift-price-idr').value = gift.price_idr;
+                    document.getElementById('gift-redeem-idr').value = gift.redeem_value_idr;
+                    document.getElementById('gift-price-usd').value = gift.price_usd_cents;
+                    document.getElementById('gift-redeem-usd').value = gift.redeem_value_usd_cents;
+                    document.getElementById('gift-is-active').value = gift.is_active;
+                    openModal('modal-form-gift');
+                } else if (e.target.classList.contains('btn-delete-gift')) {
+                    const id = e.target.dataset.id;
+                    openDeleteConfirm('Anda yakin ingin menghapus gift ini?', async () => {
+                        await apiFetch(`/api/admin/gifts-store/${id}`, { method: 'DELETE' });
+                        showToast('Gift berhasil dihapus!');
+                        await loadGifts();
+                    });
+                }
+            });
+            
+            giftForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('gift-edit-id').value;
+                const data = {
+                    name_id: document.getElementById('gift-name-id').value,
+                    name_en: document.getElementById('gift-name-en').value,
+                    name_id_lang: document.getElementById('gift-name-id-lang').value,
+                    image_url: document.getElementById('gift-image-url').value,
+                    price_idr: parseInt(document.getElementById('gift-price-idr').value),
+                    redeem_value_idr: parseInt(document.getElementById('gift-redeem-idr').value),
+                    price_usd_cents: parseInt(document.getElementById('gift-price-usd').value),
+                    redeem_value_usd_cents: parseInt(document.getElementById('gift-redeem-usd').value),
+                    is_active: parseInt(document.getElementById('gift-is-active').value),
+                };
+                
+                const url = id ? `/api/admin/gifts-store/${id}` : '/api/admin/gifts-store';
+                const method = id ? 'PUT' : 'POST';
+                
+                try {
+                    await apiFetch(url, {
+                        method: method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                    });
+                    closeModal();
+                    showToast(`Gift berhasil ${id ? 'diperbarui' : 'dibuat'}!`);
+                    await loadGifts();
+                } catch (error) { console.error('Gagal menyimpan gift:', error); }
+            });
+            
+            // --- 5. Blog Posts ---
+            const postsTableBody = document.getElementById('posts-table-body');
+            const postForm = document.getElementById('form-post');
+            const postModalTitle = document.getElementById('post-modal-title');
+            let allPosts = [];
+            
+            async function loadBlogPosts() {
+                try {
+                    allPosts = await apiFetch('/api/admin/blog/posts');
+                    renderBlogPostsTable();
+                } catch (error) { console.error('Gagal memuat postingan:', error); }
+            }
+            
+            function renderBlogPostsTable() {
+                postsTableBody.innerHTML = '';
+                if (allPosts.length === 0) {
+                    postsTableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">Belum ada postingan</td></tr>`;
+                    return;
+                }
+                allPosts.forEach(post => {
+                    const row = `
+                        <tr>
+                            <td class="p-4">${post.title}</td>
+                            <td class="p-4">${post.slug}</td>
+                            <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium rounded-full ${post.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${post.status}</span></td>
+                            <td class="p-4 space-x-2">
+                                <button class="btn-edit-post text-blue-600 hover:text-blue-800" data-id="${post.id}">Edit</button>
+                                <button class="btn-delete-post text-red-600 hover:text-red-800" data-id="${post.id}">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                    postsTableBody.innerHTML += row;
+                });
+            }
+
+            document.getElementById('btn-add-post').addEventListener('click', () => {
+                postModalTitle.textContent = 'Add New Post';
+                postForm.reset();
+                document.getElementById('post-edit-id').value = '';
+                openModal('modal-form-post');
+            });
+
+            postsTableBody.addEventListener('click', async (e) => {
+                if (e.target.classList.contains('btn-edit-post')) {
+                    const id = e.target.dataset.id;
+                    const post = await apiFetch(`/api/admin/blog/posts/${id}`);
+                    postModalTitle.textContent = 'Edit Post';
+                    document.getElementById('post-edit-id').value = post.id;
+                    document.getElementById('post-title').value = post.title;
+                    document.getElementById('post-slug').value = post.slug;
+                    document.getElementById('post-image-url').value = post.featured_image_url;
+                    document.getElementById('post-content').value = post.content;
+                    document.getElementById('post-status').value = post.status;
+                    openModal('modal-form-post');
+                } else if (e.target.classList.contains('btn-delete-post')) {
+                    const id = e.target.dataset.id;
+                    openDeleteConfirm('Anda yakin ingin menghapus postingan ini?', async () => {
+                        await apiFetch(`/api/admin/blog/posts/${id}`, { method: 'DELETE' });
+                        showToast('Postingan berhasil dihapus!');
+                        await loadBlogPosts();
+                    });
+                }
+            });
+
+            postForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('post-edit-id').value;
+                const data = {
+                    title: document.getElementById('post-title').value,
+                    slug: document.getElementById('post-slug').value,
+                    featured_image_url: document.getElementById('post-image-url').value,
+                    content: document.getElementById('post-content').value,
+                    status: document.getElementById('post-status').value,
+                };
+                
+                const url = id ? `/api/admin/blog/posts/${id}` : '/api/admin/blog/posts';
+                const method = id ? 'PUT' : 'POST';
+                
+                try {
+                    await apiFetch(url, {
+                        method: method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                    });
+                    closeModal();
+                    showToast(`Postingan berhasil ${id ? 'diperbarui' : 'dibuat'}!`);
+                    await loadBlogPosts();
+                } catch (error) { console.error('Gagal menyimpan postingan:', error); }
+            });
+
+            // --- 6. Blog Categories ---
+            const categoryForm = document.getElementById('form-add-category');
+            const categoryInput = document.getElementById('category-name-input');
+            const categoryList = document.getElementById('categories-list');
+
+            async function loadBlogCategories() {
+                try {
+                    const categories = await apiFetch('/api/admin/blog/categories');
+                    categoryList.innerHTML = '';
+                    if (categories.length === 0) {
+                        categoryList.innerHTML = `<p class="text-sm text-gray-500">Belum ada kategori.</p>`;
+                        return;
+                    }
+                    categories.forEach(cat => {
+                        categoryList.innerHTML += `<div class="flex justify-between items-center p-2 bg-gray-50 rounded"><span>${cat.name}</span><button class="btn-delete-category text-red-500 hover:text-red-700" data-id="${cat.id}"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
+                    });
+                    lucide.createIcons(); // Re-render ikon
+                } catch (error) { console.error('Gagal memuat kategori:', error); }
+            }
+            
+            categoryForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = categoryInput.value;
+                if (!name) return;
+                try {
+                    await apiFetch('/api/admin/blog/categories', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name }),
+                    });
+                    categoryInput.value = '';
+                    showToast('Kategori dibuat!');
+                    await loadBlogCategories();
+                } catch (error) { console.error('Gagal menyimpan kategori:', error); }
+            });
+
+            // --- 7. Blog Tags ---
+            const tagForm = document.getElementById('form-add-tag');
+            const tagInput = document.getElementById('tag-name-input');
+            const tagList = document.getElementById('tags-list');
+
+            async function loadBlogTags() {
+                try {
+                    const tags = await apiFetch('/api/admin/blog/tags');
+                    tagList.innerHTML = '';
+                    if (tags.length === 0) {
+                        tagList.innerHTML = `<p class="text-sm text-gray-500">Belum ada tag.</p>`;
+                        return;
+                    }
+                    tags.forEach(tag => {
+                        tagList.innerHTML += `<div class="flex justify-between items-center p-2 bg-gray-50 rounded"><span>${tag.name}</span><button class="btn-delete-tag text-red-500 hover:text-red-700" data-id="${tag.id}"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
+                    });
+                    lucide.createIcons(); // Re-render ikon
+                } catch (error) { console.error('Gagal memuat tag:', error); }
+            }
+            
+            tagForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = tagInput.value;
+                if (!name) return;
+                try {
+                    await apiFetch('/api/admin/blog/tags', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name }),
+                    });
+                    tagInput.value = '';
+                    showToast('Tag dibuat!');
+                    await loadBlogTags();
+                } catch (error) { console.error('Gagal menyimpan tag:', error); }
+            });
+            
+            // --- 8. Manage Pages ---
+            const pagesTableBody = document.getElementById('pages-table-body');
+            const pageForm = document.getElementById('form-page');
+            const pageModalTitle = document.getElementById('page-modal-title');
+            let allPages = [];
+
+            async function loadPages() {
+                try {
+                    allPages = await apiFetch('/api/admin/pages');
+                    renderPagesTable();
+                } catch (error) { console.error('Gagal memuat halaman:', error); }
+            }
+            
+            function renderPagesTable() {
+                pagesTableBody.innerHTML = '';
+                if (allPages.length === 0) {
+                    pagesTableBody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-500">Belum ada halaman</td></tr>`;
+                    return;
+                }
+                allPages.forEach(page => {
+                    const row = `
+                        <tr>
+                            <td class="p-4">${page.title}</td>
+                            <td class="p-4">${page.template_type}</td>
+                            <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium rounded-full ${page.status === 'published' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${page.status}</span></td>
+                            <td class="p-4 space-x-2">
+                                <button class="btn-edit-page text-blue-600 hover:text-blue-800" data-id="${page.id}">Edit</button>
+                                <button class="btn-delete-page text-red-600 hover:text-red-800" data-id="${page.id}">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                    pagesTableBody.innerHTML += row;
+                });
+            }
+            
+            document.getElementById('btn-add-page').addEventListener('click', () => {
+                pageModalTitle.textContent = 'Add New Page';
+                pageForm.reset();
+                document.getElementById('page-edit-id').value = '';
+                openModal('modal-form-page');
+            });
+            
+            pagesTableBody.addEventListener('click', async (e) => {
+                // TODO: Implementasi Edit & Delete untuk Pages (mirip Blog)
+            });
+
+            pageForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('page-edit-id').value;
+                const data = {
+                    title: document.getElementById('page-title').value,
+                    slug: document.getElementById('page-slug').value,
+                    template_type: document.getElementById('page-template').value,
+                    content: document.getElementById('page-content').value,
+                    status: document.getElementById('page-status').value,
+                };
+                
+                const url = id ? `/api/admin/pages/${id}` : '/api/admin/pages';
+                const method = id ? 'PUT' : 'POST';
+                
+                try {
+                    await apiFetch(url, {
+                        method: method,
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data),
+                    });
+                    closeModal();
+                    showToast(`Halaman berhasil ${id ? 'diperbarui' : 'dibuat'}!`);
+                    await loadPages();
+                } catch (error) { console.error('Gagal menyimpan halaman:', error); }
+            });
+
+
+            // --- F. INISIALISASI ---
+            initializeApp();
         });
     </script>
     
@@ -489,26 +1235,30 @@
         .nav-link {
             display: flex;
             align-items: center;
-            padding: 0.75rem 1.5rem; /* 12px 24px */
-            font-size: 0.95rem; /* Sedikit lebih kecil dari default */
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
             font-weight: 500;
-            color: #4b5563; /* text-gray-600 */
+            color: #4b5563;
             transition: all 0.2s ease-in-out;
         }
         .nav-link:hover {
-            background-color: #f9fafb; /* bg-gray-50 */
-            color: #1f2937; /* text-gray-800 */
+            background-color: #f9fafb;
+            color: #1f2937;
         }
         .nav-link.active {
-            background-color: #eff6ff; /* bg-blue-50 */
-            color: #2563eb; /* text-blue-600 */
-            border-right: 3px solid #2563eb; /* Border biru di kanan */
+            background-color: #eff6ff;
+            color: #2563eb;
+            border-right: 3px solid #2563eb;
         }
         .nav-link svg {
-            width: 1.15rem; /* 18px */
-            height: 1.15rem; /* 18px */
-            margin-right: 0.75rem; /* 12px */
+            width: 1.15rem;
+            height: 1.15rem;
+            margin-right: 0.75rem;
             flex-shrink: 0;
+        }
+        /* Style untuk modal backdrop */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
         }
     </style>
 </body>
