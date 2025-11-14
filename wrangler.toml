@@ -1,0 +1,18 @@
+name = "cuanfans-local"
+compatibility_date = "2024-05-01"
+
+# Menunjukkan ke Wrangler di mana folder statis (HTML/CSS) berada
+pages_build_output_dir = "public"
+
+# Binding D1 (Database)
+# Ganti 'nama-database-anda' dengan nama D1 database Anda
+# Ganti 'xxxxxx' dengan ID database D1 Anda
+[[d1_databases]]
+binding = "DB" # HARUS "DB" agar c.env.DB berfungsi
+database_name = "nama-database-anda"
+database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+# Variabel Lingkungan (Environment Variables)
+# Ganti 'secret-lokal-anda' dengan JWT secret untuk pengujian lokal
+[vars]
+JWT_SECRET = "secret-lokal-anda"
