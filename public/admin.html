@@ -73,6 +73,26 @@
                     <i data-lucide="heart"></i>
                     <span>Manage Fans</span>
                 </a>
+
+                <!-- Navigasi Baru untuk Blog & Pages -->
+                <a href="#" class="nav-link" data-page="page-blog-posts">
+                    <i data-lucide="file-text"></i>
+                    <span>Blog Posts</span>
+                </a>
+                <a href="#" class="nav-link" data-page="page-blog-categories">
+                    <i data-lucide="folder-open"></i>
+                    <span>Blog Categories</span>
+                </a>
+                <a href="#" class="nav-link" data-page="page-blog-tags">
+                    <i data-lucide="tag"></i>
+                    <span>Blog Tags</span>
+                </a>
+                <a href="#" class="nav-link" data-page="page-pages">
+                    <i data-lucide="file-spreadsheet"></i>
+                    <span>Manage Pages</span>
+                </a>
+                <!-- Akhir Navigasi Baru -->
+
                 <a href="#" class="nav-link" data-page="page-platform-channels">
                     <i data-lucide="credit-card"></i>
                     <span>Platform Payments</span>
@@ -190,117 +210,6 @@
                     </div>
                 </div>
 
-                <!-- ===== PAGE: MANAGE USERS ===== -->
-                <div id="page-users" class="page-content hidden">
-                    <div class="flex justify-between items-center mb-6">
-                        <h1 class="text-3xl font-bold text-gray-800">Manage Users</h1>
-                        <!-- Tombol Aksi -->
-                    </div>
-                    <!-- Tabel Users -->
-                    <div class="bg-white rounded-lg shadow overflow-x-auto">
-                        <table class="w-full min-w-max">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Name</th>
-                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Email</th>
-                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Role</th>
-                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Status</th>
-                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                <!-- TODO: Fetch data /api/admin/users -->
-                                <tr>
-                                    <td class="p-4">John Doe</td>
-                                    <td class="p-4">john@example.com</td>
-                                    <td class="p-4">member</td>
-                                    <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full">active</span></td>
-                                    <td class="p-4 space-x-2">
-                                        <button class="text-blue-600 hover:text-blue-800">Edit</button>
-                                        <button class="text-red-600 hover:text-red-800">Suspend</button>
-                                    </td>
-                                </tr>
-                                <!-- ... baris data lainnya ... -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- ===== PAGE: ALL PROJECTS ===== -->
-                <div id="page-projects" class="page-content hidden">
-                    <h1 class="text-3xl font-bold text-gray-800 mb-6">All Projects</h1>
-                    <!-- Tabel Projects -->
-                    <div class="bg-white rounded-lg shadow overflow-x-auto">
-                        <!-- TODO: Buat tabel untuk 'projects', join dengan 'users' -->
-                        <p class="p-6 text-gray-500">[Placeholder tabel untuk semua proyek pengguna]</p>
-                    </div>
-                </div>
-
-                <!-- ===== PAGE: ALL TRANSACTIONS ===== -->
-                <div id="page-transactions" class="page-content hidden">
-                    <h1 class="text-3xl font-bold text-gray-800 mb-6">All Transactions</h1>
-                    <!-- Tabel Transactions -->
-                    <div class="bg-white rounded-lg shadow overflow-x-auto">
-                        <!-- TODO: Buat tabel untuk 'transactions' -->
-                        <p class="p-6 text-gray-500">[Placeholder tabel untuk semua transaksi, termasuk project_id=1 dan proyek pengguna]</p>
-                    </div>
-                </div>
-
-                <!-- ===== PAGE: GIFTS STORE ===== -->
-                <div id="page-gifts-store" class="page-content hidden">
-                    <div class="flex justify-between items-center mb-6">
-                        <h1 class="text-3xl font-bold text-gray-800">Manage Gifts Store</h1>
-                        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 flex items-center space-x-2">
-                            <i data-lucide="plus" class="w-4 h-4"></i>
-                            <span>Add New Gift</span>
-                        </button>
-                    </div>
-                    <!-- Tabel Gifts Store -->
-                    <div class="bg-white rounded-lg shadow overflow-x-auto">
-                        <table class="w-full min-w-max">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Name (EN)</th>
-                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Name (ID)</th>
-                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Price (IDR)</th>
-                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Redeem (IDR)</th>
-                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Price (USDc)</th>
-                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Redeem (USDc)</th>
-                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Status</th>
-                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-gray-200">
-                                <!-- TODO: Fetch data 'gifts_store' -->
-                                <tr>
-                                    <td class="p-4">Coffee</td>
-                                    <td class="p-4">Kopi</td>
-                                    <td class="p-4">10000</td>
-                                    <td class="p-4">9000</td>
-                                    <td class="p-4">60</td>
-                                    <td class="p-4">50</td>
-                                    <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full">active</span></td>
-                                    <td class="p-4 space-x-2">
-                                        <button class="text-blue-600 hover:text-blue-800">Edit</button>
-                                        <button class="text-red-600 hover:text-red-800">Disable</button>
-                                    </td>
-                                </tr>
-                                <!-- ... baris data lainnya ... -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- ===== PAGE: WALLETS & REDEEM ===== -->
-                <div id="page-wallets" class="page-content hidden">
-                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Wallets & Redeem</h1>
-                    <!-- Tabel Wallets -->
-                    <div class="bg-white rounded-lg shadow overflow-x-auto">
-                        <!-- TODO: Buat tabel untuk 'wallets' dan 'wallet_transactions' -->
-                        <p class="p-6 text-gray-500">[Placeholder untuk melihat saldo wallet (users & fans) dan histori redeem]</p>
-                    </div>
-                </div>
-                
                 <!-- ===== PAGE: MANAGE FANS ===== -->
                 <div id="page-fans" class="page-content hidden">
                     <h1 class="text-3xl font-bold text-gray-800 mb-6">Manage Fans</h1>
@@ -310,6 +219,117 @@
                         <p class="p-6 text-gray-500">[Placeholder tabel untuk semua fans yang terdaftar]</p>
                     </div>
                 </div>
+
+                <!-- ===== PAGE: BLOG POSTS ===== -->
+                <div id="page-blog-posts" class="page-content hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-3xl font-bold text-gray-800">Blog Posts</h1>
+                        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 flex items-center space-x-2">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>Add New Post</span>
+                        </button>
+                    </div>
+                    <!-- Tabel Blog Posts -->
+                    <div class="bg-white rounded-lg shadow overflow-x-auto">
+                        <table class="w-full min-w-max">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Title</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Status</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Published</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <!-- TODO: Fetch data 'blog_posts' -->
+                                <tr>
+                                    <td class="p-4">Update Sistem v1.1</td>
+                                    <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full">published</span></td>
+                                    <td class="p-4">14 Nov 2025</td>
+                                    <td class="p-4 space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">Edit</button>
+                                        <button class="text-red-600 hover:text-red-800">Delete</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4">Panduan Redeem Gifts</td>
+                                    <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium bg-yellow-100 text-yellow-700 rounded-full">draft</span></td>
+                                    <td class="p-4">-</td>
+                                    <td class="p-4 space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">Edit</button>
+                                        <button class="text-red-600 hover:text-red-800">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- TODO: Modal/Form untuk Add/Edit Post. Formnya harus ada:
+                         title, slug, content (textarea), 
+                         featured_image_url (text input, cth: /images/nama-file.png), 
+                         status (select), categories (checkboxes), tags (text input) -->
+                </div>
+
+                <!-- ===== PAGE: BLOG CATEGORIES ===== -->
+                <div id="page-blog-categories" class="page-content hidden">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Blog Categories</h1>
+                    <!-- TODO: Buat UI untuk CRUD Categories -->
+                    <p class="p-6 bg-white rounded-lg shadow text-gray-500">[Placeholder untuk CRUD (Create, Read, Update, Delete) Kategori Blog]</p>
+                </div>
+
+                <!-- ===== PAGE: BLOG TAGS ===== -->
+                <div id="page-blog-tags" class="page-content hidden">
+                    <h1 class="text-3xl font-bold text-gray-800 mb-6">Blog Tags</h1>
+                    <!-- TODO: Buat UI untuk CRUD Tags -->
+                    <p class="p-6 bg-white rounded-lg shadow text-gray-500">[Placeholder untuk CRUD (Create, Read, Update, Delete) Tags Blog]</p>
+                </div>
+
+                <!-- ===== PAGE: MANAGE PAGES ===== -->
+                <div id="page-pages" class="page-content hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-3xl font-bold text-gray-800">Manage Pages</h1>
+                        <button class="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 flex items-center space-x-2">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>Add New Page</span>
+                        </button>
+                    </div>
+                    <!-- Tabel Pages -->
+                    <div class="bg-white rounded-lg shadow overflow-x-auto">
+                        <table class="w-full min-w-max">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Title</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Template</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Status</th>
+                                    <th class="p-4 text-left text-sm font-semibold text-gray-600">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <!-- TODO: Fetch data 'pages' -->
+                                <tr>
+                                    <td class="p-4">FAQ</td>
+                                    <td class="p-4">faq</td>
+                                    <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full">published</span></td>
+                                    <td class="p-4 space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">Edit</button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4">Guides</td>
+                                    <td class="p-4">guides</td>
+                                    <td class="p-4"><span class="px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 rounded-full">published</span></td>
+                                    <td class="p-4 space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">Edit</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- TODO: Modal/Form untuk Add/Edit Page. Formnya harus ada:
+                         title, slug, content (textarea), 
+                         template_type (select: standard, faq, guides), 
+                         status (select) -->
+                </div>
+
 
                 <!-- ===== PAGE: PLATFORM PAYMENTS ===== -->
                 <div id="page-platform-channels" class="page-content hidden">
