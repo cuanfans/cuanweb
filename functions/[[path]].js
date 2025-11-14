@@ -463,7 +463,147 @@ pub.get('/pages/:slug', async (c) => {
     }
 });
 
+// ==========================================================
+// --- RUTE API BARU: MEMBER AREA ---
+// ==========================================================
 
+// Endpoint untuk Statistik Dashboard Member
+api.get('/member/stats', authMiddleware, async (c) => {
+    const user = c.get('user');
+    try {
+        const [projects, revenueIDR, revenueUSD, gifts] = await Promise.all([
+            c.env.DB.prepare("SELECT COUNT(id) as value FROM projects WHERE user_id = ?").bind(user.sub).first(),
+            c.env.DB.prepare("SELECT SUM(t.total_amount) as value FROM transactions t JOIN projects p ON t.project_id = p.id WHERE p.user_id = ? AND t.status = 'PAID' AND t.currency = 'IDR'").bind(user.sub).first(),
+            c.env.DB.prepare("SELECT SUM(t.total_amount) as value FROM transactions t JOIN projects p ON t.project_id = p.id WHERE p.user_id = ? AND t.status = 'PAID' AND t.currency = 'USD'").bind(user.sub).first(),
+            c.env.DB.prepare("SELECT COUNT(id) as value FROM user_gift_inventory WHERE owner_user_id = ? AND status = 'OWNED'").bind(user.sub).first()
+        ]);
+        return c.json({
+            total_projects: projects.value || 0,
+            total_revenue_idr: revenueIDR.value || 0,
+            total_revenue_usd: revenueUSD.value || 0,
+            total_gifts_owned: gifts.value || 0
+        });
+    } catch (e) {
+        return c.json({ error: 'Gagal memuat statistik member: ' + e.message }, 500);
+    }
+});
+
+// Endpoint untuk Transaksi Member (BYOG)
+api.get('/transactions', authMiddleware, async (c) => {
+    const user = c.get('user');
+    const { project_id, status } = c.req.query();
+    
+    let query = `
+        SELECT t.id, t.reference_id, t.total_amount, t.currency, t.status, t.created_at, p.name as project_name
+        FROM transactions t
+        JOIN projects p ON t.project_id = p.id
+        WHERE p.user_id = ?
+    `;
+    const params = [user.sub];
+
+    if (project_id) {
+        query += " AND t.project_id = ?";
+        params.push(project_id);
+    }
+    if (status) {
+        query += " AND t.status = ?";
+        params.push(status.toUpperCase());
+    }
+    query += " ORDER BY t.created_at DESC LIMIT 50";
+
+    try {
+        const { results } = await c.env.DB.prepare(query).bind(...params).all();
+        return c.json(results || []);
+    } catch (e) {
+        return c.json({ error: 'Gagal memuat transaksi: ' + e.message }, 500);
+    }
+});
+
+// Endpoint untuk Wallet Member
+api.get('/wallets', authMiddleware, async (c) => {
+    const user = c.get('user');
+    try {
+        const wallet = await c.env.DB.prepare(
+            "SELECT balance_idr, balance_usd_cents FROM wallets WHERE user_id = ?"
+        ).bind(user.sub).first();
+        
+        if (!wallet) {
+            return c.json({ balance_idr: 0, balance_usd_cents: 0 });
+        }
+        return c.json(wallet);
+    } catch (e) {
+        return c.json({ error: 'Gagal memuat wallet: ' + e.message }, 500);
+    }
+});
+
+// Endpoint untuk Histori Transaksi Wallet Member
+api.get('/wallets/transactions', authMiddleware, async (c) => {
+    const user = c.get('user');
+    try {
+        const { results } = await c.env.DB.prepare(
+            `SELECT wt.type, wt.amount, wt.currency, wt.status, wt.created_at 
+             FROM wallet_transactions wt
+             JOIN wallets w ON wt.wallet_id = w.id
+             WHERE w.user_id = ? 
+             ORDER BY wt.created_at DESC LIMIT 50`
+        ).bind(user.sub).all();
+        return c.json(results || []);
+    } catch (e) {
+        return c.json({ error: 'Gagal memuat histori wallet: ' + e.message }, 500);
+    }
+});
+
+// Endpoint untuk Inventaris Gift Member
+api.get('/gifts/inventory', authMiddleware, async (c) => {
+    const user = c.get('user');
+    try {
+        const { results } = await c.env.DB.prepare(
+            `SELECT inv.id, inv.status, inv.redeem_code, g.name_id_lang, g.name_en, g.image_url 
+             FROM user_gift_inventory inv
+             JOIN gifts_store g ON inv.gift_id = g.id
+             WHERE inv.owner_user_id = ?
+             ORDER BY inv.created_at DESC`
+        ).bind(user.sub).all();
+        return c.json(results || []);
+    } catch (e) {
+        return c.json({ error: 'Gagal memuat inventaris gift: ' + e.message }, 500);
+    }
+});
+
+// Endpoint untuk Generate Kode Redeem
+api.post('/gifts/generate-redeem', authMiddleware, async (c) => {
+    const user = c.get('user');
+    const { inventory_id } = await c.req.json();
+    const now = Math.floor(Date.now() / 1000);
+    
+    if (!inventory_id) return c.json({ error: 'inventory_id wajib diisi' }, 400);
+
+    try {
+        const item = await c.env.DB.prepare(
+            "SELECT id, status FROM user_gift_inventory WHERE id = ? AND owner_user_id = ?"
+        ).bind(inventory_id, user.sub).first();
+
+        if (!item) {
+            return c.json({ error: 'Item gift tidak ditemukan atau bukan milik Anda' }, 404);
+        }
+        if (item.status !== 'OWNED') {
+            return c.json({ error: 'Hanya gift dengan status OWNED yang bisa dibuatkan kode' }, 400);
+        }
+        
+        const newRedeemCode = `CF-${crypto.randomUUID().substring(0, 8).toUpperCase()}`;
+        
+        await c.env.DB.prepare(
+            "UPDATE user_gift_inventory SET redeem_code = ?, updated_at = ? WHERE id = ?"
+        ).bind(newRedeemCode, now, inventory_id).run();
+
+        return c.json({ message: 'Kode redeem berhasil dibuat!', redeem_code: newRedeemCode });
+    } catch (e) {
+        if (e.message.includes('UNIQUE constraint failed')) {
+            return c.json({ error: 'Gagal membuat kode unik, silakan coba lagi.' }, 500);
+        }
+        return c.json({ error: 'Gagal membuat kode redeem: ' + e.message }, 500);
+    }
+});
 // --- RUTE API KREATOR (Dashboard & BYOG) ---
 
 // Endpoint Autentikasi Kreator
