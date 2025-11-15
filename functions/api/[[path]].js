@@ -1,9 +1,8 @@
 import { Hono } from 'hono';
 import { handle } from 'hono/cloudflare-pages';
-// Kita masih perlu 'serveStatic' untuk catch-all terakhir
 import { serveStatic } from 'hono/cloudflare-pages';
 
-// Impor semua rute API Anda (gunakan './')
+// ... (semua import rute API Anda: adminRoutes, dkk.) ...
 import adminRoutes from './routes/admin.js';
 import memberRoutes from './routes/member.js';
 import publicRoutes from './routes/public.js';
@@ -27,30 +26,49 @@ api.route('/', authRoutes);
 api.route('/', hookRoutes);
 
 
-// --- 2. RUTE HALAMAN STATIS (PERBAIKAN UTAMA) ---
-// Handler ini akan mengambil file HTML statis dari direktori 'public' (ASSETS)
-const serveHtmlShell = (c, shellPath) => {
+// --- 2. RUTE HALAMAN STATIS (VERSI BARU YANG LEBIH KUAT) ---
+const serveHtmlShell = async (c, shellPath) => {
+  // LOG 1: Mencatat percobaan
+  console.log(`Mencoba menyajikan shell: ${shellPath} untuk URL: ${c.req.url}`);
+  
   const url = new URL(c.req.url);
-  // Buat URL baru yang menunjuk ke file HTML shell di root
-  // Contoh: https://cuanfans.pages.dev/blog.html
   const assetUrl = new URL(shellPath, url.origin);
-  // Ambil aset (blog.html atau page.html) dan sajikan
-  return c.env.ASSETS.fetch(assetUrl);
+  
+  // LOG 2: Mencatat aset apa yang diambil
+  console.log(`URL Aset yang diambil: ${assetUrl.toString()}`);
+  
+  try {
+    const response = await c.env.ASSETS.fetch(assetUrl);
+    
+    // PENANGANAN ERROR: Hentikan fall-through jika file tidak ditemukan
+    if (!response.ok) {
+      console.error(`Gagal mengambil aset: ${shellPath}. Status: ${response.status}`);
+      return c.text(`Gagal memuat aset ${shellPath}. Status: ${response.status}`, 500);
+    }
+    
+    // LOG 3: Berhasil
+    console.log(`Berhasil mengambil aset: ${shellPath}`);
+    return response;
+    
+  } catch (err) {
+    // PENANGANAN ERROR: Hentikan fall-through jika ada error sistem
+    console.error(`Error di c.env.ASSETS.fetch: ${err.message}`);
+    return c.text(`Error server saat mengambil aset: ${err.message}`, 500);
+  }
 };
 
-// Saat URL adalah /blog, sajikan shell /blog.html
+// Rute-rute ini sekarang 'async'
 app.get('/blog', (c) => serveHtmlShell(c, 'blog.html'));
-
-// Saat URL adalah /blog/* (misal /blog/tesblog), sajikan JUGA shell /blog.html
 app.get('/blog/*', (c) => serveHtmlShell(c, 'blog.html'));
-
-// Saat URL adalah /p/*, sajikan shell /page.html
 app.get('/p/*', (c) => serveHtmlShell(c, 'page.html'));
 
 
 // --- 3. CATCH-ALL (TERAKHIR) ---
-// Ini akan menangani /index.html, /login.html, /admin.html,
-// dan semua aset lain (CSS, JS, gambar) yang namanya cocok.
-app.get('*', serveStatic({ root: './' }));
+// Kita tambahkan log di sini untuk membuktikan jika /blog/tesblog jatuh ke sini
+app.get('*', (c) => {
+  console.log(`JATUH KE CATCH-ALL (*) untuk URL: ${c.req.url}`);
+  // Gunakan return eksplisit di sini
+  return serveStatic({ root: './' })(c);
+});
 
 export const onRequest = handle(app);
