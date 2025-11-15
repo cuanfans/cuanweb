@@ -1,21 +1,5 @@
 {
     "version": 1,
-    "include": [
-        "/blog",
-        "/blog/*",
-        "/p/*"
-    ],
-    "exclude": [
-        "/api/*",
-        "/images/*",
-        "/css/*",
-        "/*.js",
-        "/*.css",
-        "/admin.html",
-        "/member.html",
-        "/login.html",
-        "/register.html"
-    ],
     "routes": [
         {
             "src": "/blog",
@@ -29,5 +13,13 @@
             "src": "/p/(.*)",
             "dest": "/page.html"
         }
+    ],
+    "include": [
+        "/*"
+    ],
+    "exclude": [
+        "/images/*",
+        "/css/*",
+        "/favicon.ico"
     ]
 }
