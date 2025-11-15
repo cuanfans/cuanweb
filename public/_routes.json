@@ -1,0 +1,25 @@
+{
+    "version": 1,
+    "routes": [
+        {
+            "src": "/blog",
+            "dest": "/blog.html"
+        },
+        {
+            "src": "/blog/(.*)",
+            "dest": "/blog.html"
+        },
+        {
+            "src": "/p/(.*)",
+            "dest": "/page.html"
+        }
+    ],
+    "include": [
+        "/*"
+    ],
+    "exclude": [
+        "/images/*",
+        "/css/*",
+        "/favicon.ico"
+    ]
+}
