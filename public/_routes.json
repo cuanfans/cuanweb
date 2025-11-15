@@ -14,12 +14,6 @@
             "dest": "/page.html"
         }
     ],
-    "include": [
-        "/*"
-    ],
-    "exclude": [
-        "/images/*",
-        "/css/*",
-        "/favicon.ico"
-    ]
+    "include": [ "/*" ],
+    "exclude": []
 }
