@@ -1,0 +1,29 @@
+{
+    "version": 1,
+    "include": [
+        "/blog",
+        "/blog/*",
+        "/p/*"
+    ],
+    "exclude": [
+        "/api/*",
+        "/images/*",
+        "/css/*",
+        "/*.js",
+        "/*.css"
+    ],
+    "routes": [
+        {
+            "src": "/blog",
+            "dest": "/blog.html"
+        },
+        {
+            "src": "/blog/(.*)",
+            "dest": "/blog.html"
+        },
+        {
+            "src": "/p/(.*)",
+            "dest": "/page.html"
+        }
+    ]
+}
