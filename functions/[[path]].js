@@ -30,17 +30,20 @@ api.route('/', authRoutes);
 api.route('/', hookRoutes);
 
 
-// ===== TAMBAHAN: SOLUSI PERUTEAN SPA =====
-// Implementasikan ulang logika _routes.json secara manual di Hono.
-// Rute-rute ini harus ada SEBELUM catch-all app.get('*', ...).
+// ===== BLOK DIAGNOSTIK (GANTIKAN KODE LAMA ANDA DENGAN INI) =====
 
-// Menyajikan 'blog.html' untuk rute /blog dan /blog/*
-app.get('/blog', serveStatic({ path: './blog.html' }));
-app.get('/blog/*', serveStatic({ path: './blog.html' }));
+app.get('/blog', (c) => {
+  return c.text('INI HALAMAN DAFTAR /blog');
+});
 
-// Menyajikan 'page.html' untuk rute /p/*
-app.get('/p/*', serveStatic({ path: './page.html' }));
-// ==========================================
+app.get('/blog/*', (c) => {
+  return c.text('INI HALAMAN DETAIL /blog/*'); 
+});
+
+app.get('/p/*', (c) => {
+  return c.text('INI HALAMAN PAGES /p/*');
+});
+// ========================================================
 
 
 // --- RUTE FILE STATIS ---
