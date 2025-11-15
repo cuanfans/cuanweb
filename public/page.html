@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CuanFans</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide-dev@0.395.0"></script>
+    <!-- Impor Showdown untuk konversi Markdown ke HTML -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-text {
+            background: linear-gradient(to right, #4f46e5, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        /* Style untuk konten halaman */
+        .prose h1 { @apply text-3xl font-bold mb-4; }
+        .prose h2 { @apply text-2xl font-semibold mb-3; }
+        .prose p { @apply text-gray-700 mb-4 leading-relaxed; }
+        .prose a { @apply text-blue-600 hover:underline; }
+        .prose ul { @apply list-disc list-inside mb-4; }
+    </style>
+</head>
+<body class="bg-gray-50 antialiased">
+
+    <!-- Header (Sama seperti index.html untuk konsistensi) -->
+    <header id="header" class="relative z-10 w-full bg-white/70 backdrop-blur-md shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="/" class="flex items-center space-x-2">
+                    <span class="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
+                        <i data-lucide="zap" class="text-white w-5 h-5"></i>
+                    </span>
+                    <span class="text-2xl font-bold text-gray-900">CuanFans</span>
+                </a>
+                <nav class="hidden md:flex md:items-center md:space-x-8">
+                    <a href="/#fitur" class="font-medium text-gray-600 hover:text-gray-900">Fitur</a>
+                    <a href="/#harga" class="font-medium text-gray-600 hover:text-gray-900">Harga</a>
+                    <a href="/#api" class="font-medium text-gray-600 hover:text-gray-900">API</a>
+                    <a href="/blog" class="font-medium text-gray-600 hover:text-gray-900">Blog</a>
+                </nav>
+                <div class="flex items-center space-x-4">
+                    <a href="/login.html" class="hidden md:inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">Masuk</a>
+                    <a href="/register.html" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700">Daftar</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Konten Utama -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div id="page-content-container" class="prose lg:prose-lg max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md">
+            <h1 id="page-title" class="text-4xl font-extrabold text-gray-900 mb-6"></h1>
+            <div id="page-content">
+                <p class="text-gray-500">Memuat halaman...</p>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div class="mt-12 pt-8 border-t border-gray-800 text-center text-sm">
+                &copy; <span id="footer-year">2025</span> CuanFans. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                lucide.createIcons();
+                document.getElementById('footer-year').textContent = new Date().getFullYear();
+            } catch (e) { console.warn('Lucide failed to load'); }
+
+            const converter = new showdown.Converter();
+            const path = window.location.pathname;
+            const parts = path.split('/').filter(Boolean); // Cth: ['p', 'faq']
+
+            const titleEl = document.getElementById('page-title');
+            const contentEl = document.getElementById('page-content');
+
+            if (parts.length === 2 && parts[0] === 'p') {
+                const slug = parts[1];
+                loadSinglePage(slug);
+            } else {
+                titleEl.textContent = '404';
+                contentEl.innerHTML = '<p class="text-red-500">Halaman tidak ditemukan.</p>';
+            }
+
+            async function loadSinglePage(slug) {
+                try {
+                    const response = await fetch(`/api/public/pages/${slug}`);
+                    if (!response.ok) throw new Error('Halaman tidak ditemukan');
+                    const page = await response.json();
+
+                    // Konversi Markdown/HTML ke HTML
+                    const htmlContent = converter.makeHtml(page.content);
+
+                    // Isi konten
+                    titleEl.textContent = page.title;
+                    contentEl.innerHTML = htmlContent;
+
+                    // TODO: Terapkan template khusus jika diperlukan
+                    // if (page.template_type === 'faq') { ... }
+
+                } catch (error) {
+                    titleEl.textContent = '404';
+                    contentEl.innerHTML = `<p class="text-red-500">Halaman yang Anda cari tidak ditemukan.</p>`;
+                    console.error('Error fetching single page:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
