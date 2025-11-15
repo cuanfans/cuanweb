@@ -14,17 +14,38 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        /* Style untuk modal backdrop */
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-        /* Loading spinner */
+        .modal-backdrop { background-color: rgba(0, 0, 0, 0.5); }
         .loader {
             border-top-color: #3498db;
             animation: spin 1s linear infinite;
         }
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        /* Style untuk Nav Link (tidak bisa di-inline) */
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #4b5563;
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link:hover {
+            background-color: #f9fafb;
+            color: #1f2937;
+        }
+        .nav-link.active {
+            background-color: #eff6ff;
+            color: #2563eb;
+            border-right: 3px solid #2563eb;
+        }
+        .nav-link svg {
+            width: 1.15rem;
+            height: 1.15rem;
+            margin-right: 0.75rem;
+            flex-shrink: 0;
         }
     </style>
 </head>
@@ -474,6 +495,30 @@
                         <label for="post-content" class="block text-sm font-medium">Content (Markdown supported)</label>
                         <textarea id="post-content" rows="10" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm"></textarea>
                     </div>
+                    
+                    <!-- ====================================== -->
+                    <!-- == PERUBAHAN: TAMBAHKAN UI KATEGORI/TAG == -->
+                    <!-- ====================================== -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium">Kategori</label>
+                            <div id="post-categories-list" class="mt-2 h-32 overflow-y-auto rounded-md border border-gray-300 p-2 space-y-1 bg-gray-50">
+                                <!-- Checkbox kategori akan diisi oleh JS -->
+                                <p class="text-gray-400 text-sm">Memuat kategori...</p>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium">Tag</label>
+                            <div id="post-tags-list" class="mt-2 h-32 overflow-y-auto rounded-md border border-gray-300 p-2 space-y-1 bg-gray-50">
+                                <!-- Checkbox tag akan diisi oleh JS -->
+                                <p class="text-gray-400 text-sm">Memuat tag...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- ====================================== -->
+                    <!-- == AKHIR PERUBAHAN == -->
+                    <!-- ====================================== -->
+                    
                     <div>
                         <label for="post-status" class="block text-sm font-medium">Status</label>
                         <select id="post-status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
@@ -556,19 +601,11 @@
 
 
     <script>
-        // =================================================================
-        // PERBAIKAN: Ganti 'DOMContentLoaded' menjadi 'window.onload'
-        // Ini untuk memastikan 'lucide' sudah dimuat sebelum .createIcons() dipanggil
-        // =================================================================
         window.onload = () => {
-            // =================================================================
-            // PERBAIKAN: Bungkus lucide.createIcons() dalam try...catch
-            // =================================================================
             try {
                 lucide.createIcons();
             } catch (e) {
                 console.warn("Lucide icons failed to initialize immediately. Retrying...");
-                // Coba lagi setelah 50ms jika gagal
                 setTimeout(() => {
                     try { lucide.createIcons(); } catch (e) { console.error("Lucide failed again", e); }
                 }, 50);
@@ -584,23 +621,21 @@
             const toast = document.getElementById('toast-notification');
             const toastMessage = document.getElementById('toast-message');
 
-            // Variabel Global Sederhana (untuk menyimpan data)
+            // === B. VARIABEL GLOBAL ===
             let currentAdmin = null;
             let currentOpenModal = null;
             let deleteCallback = null;
+            // -- PERUBAHAN: Variabel untuk menyimpan data blog --
+            let allAvailableCategories = [];
+            let allAvailableTags = [];
             
             // Formatters
             const fDashboardIDR = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
             const fDashboardUSD = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
             const fTable = new Intl.NumberFormat('id-ID');
 
-            // === B. FUNGSI UTILITAS (API, Modal, Toast) ===
-
-            /**
-             * Menampilkan notifikasi toast
-             * @param {string} message - Pesan yang ditampilkan
-             * @param {boolean} [isError=false] - Tipe notifikasi (sukses/error)
-             */
+            // === C. FUNGSI UTILITAS (API, Modal, Toast) ===
+            // (Tidak ada perubahan di sini... )
             function showToast(message, isError = false) {
                 toastMessage.textContent = message;
                 toast.className = `fixed top-5 right-5 z-50 p-4 rounded-lg shadow-lg text-white ${isError ? 'bg-red-500' : 'bg-green-500'}`;
@@ -610,40 +645,27 @@
                 }, 3000);
             }
 
-            /**
-             * Wrapper Fetch API
-             * @param {string} url - URL endpoint
-             * @param {object} [options={}] - Opsi Fetch (method, body, dll)
-             */
             async function apiFetch(url, options = {}) {
                 loadingOverlay.classList.remove('hidden');
                 try {
                     const response = await fetch(url, options);
-                    
-                    if (response.status === 401) { // Session habis / tidak terautentikasi
+                    if (response.status === 401) {
                         window.location.href = '/login.html';
                         return;
                     }
-
                     const data = await response.json();
-
                     if (!response.ok) {
                         throw new Error(data.error || 'Terjadi kesalahan API');
                     }
-                    
                     return data;
                 } catch (error) {
                     showToast(error.message, true);
-                    throw error; // Lempar error agar promise chain berhenti
+                    throw error;
                 } finally {
                     loadingOverlay.classList.add('hidden');
                 }
             }
 
-            /**
-             * Membuka modal
-             * @param {string} modalId - ID dari modal yang akan dibuka
-             */
             function openModal(modalId) {
                 currentOpenModal = document.getElementById(modalId);
                 if (currentOpenModal) {
@@ -651,33 +673,23 @@
                 }
             }
 
-            /**
-             * Menutup modal yang sedang terbuka
-             */
             function closeModal() {
                 if (currentOpenModal) {
                     currentOpenModal.classList.add('hidden');
                     currentOpenModal = null;
                 }
             }
-
-            // Tambahkan event listener untuk tombol cancel dan backdrop
+            
             document.querySelectorAll('.btn-cancel, .modal-backdrop').forEach(el => {
                 el.addEventListener('click', closeModal);
             });
             
-            /**
-             * Membuka modal konfirmasi hapus
-             * @param {string} message - Pesan konfirmasi
-             * @param {function} callback - Fungsi yang dijalankan saat "Delete" diklik
-             */
             function openDeleteConfirm(message, callback) {
                 document.getElementById('delete-confirm-message').textContent = message;
                 deleteCallback = callback;
                 openModal('modal-delete-confirm');
             }
             
-            // Event listener untuk tombol konfirmasi hapus
             document.getElementById('btn-delete-confirm').addEventListener('click', async () => {
                 if (typeof deleteCallback === 'function') {
                     await deleteCallback();
@@ -687,20 +699,16 @@
             });
 
 
-            // === C. LOGIKA SPA (NAVIGASI) ===
-
+            // === D. LOGIKA SPA (NAVIGASI) ===
+            // (Tidak ada perubahan di sini...)
             function changePage(pageId, pageTitle) {
                 pageContents.forEach(page => page.classList.add('hidden'));
-                
                 const targetPage = document.getElementById(pageId);
                 if (targetPage) {
                     targetPage.classList.remove('hidden');
                     pageTitleHeader.textContent = pageTitle;
-                    
-                    // Muat data untuk halaman yang dituju
                     loadPageData(pageId);
                 }
-
                 navLinks.forEach(link => {
                     link.classList.toggle('active', link.dataset.page === pageId);
                 });
@@ -722,8 +730,8 @@
                 sidebar.classList.toggle('-translate-x-full');
             });
 
-            // === D. FUNGSI LOAD DATA PER HALAMAN ===
-
+            // === E. FUNGSI LOAD DATA PER HALAMAN ===
+            // (Tidak ada perubahan di sini...)
             async function loadPageData(pageId) {
                 switch (pageId) {
                     case 'page-dashboard':
@@ -753,7 +761,7 @@
                 }
             }
 
-            // === E. LOGIKA SPESIFIK PER HALAMAN ===
+            // === F. LOGIKA SPESIFIK PER HALAMAN ===
 
             // --- Init (Panggilan Pertama) ---
             async function initializeApp() {
@@ -761,18 +769,23 @@
                     currentAdmin = await apiFetch('/api/profile');
                     document.getElementById('admin-name-display').textContent = currentAdmin.name;
                     await loadDashboardStats();
+                    
+                    // -- PERUBAHAN: Muat data Kategori & Tag saat aplikasi dimuat --
+                    await loadAllBlogCategories();
+                    await loadAllBlogTags();
                 } catch (error) {
                     // Penanganan error sudah ada di apiFetch (redirect)
                 }
             }
 
             // --- 1. Dashboard ---
+            // (Tidak ada perubahan di sini...)
             async function loadDashboardStats() {
                 try {
                     const data = await apiFetch('/api/admin/stats');
                     document.getElementById('stat-total-users').textContent = data.totalUsers;
                     document.getElementById('stat-revenue-idr').textContent = fDashboardIDR.format(data.revenueIdr);
-                    document.getElementById('stat-revenue-usd').textContent = fDashboardUSD.format(data.revenueUsd / 100); // Asumsi USD dalam sen
+                    document.getElementById('stat-revenue-usd').textContent = fDashboardUSD.format(data.revenueUsd / 100);
                     document.getElementById('stat-gifts-redeemed').textContent = data.giftsRedeemed;
                 } catch (error) {
                     console.error('Gagal memuat statistik:', error);
@@ -780,27 +793,21 @@
             }
 
             // --- 2. Settings ---
+            // (Tidak ada perubahan di sini...)
             const settingsForm = document.getElementById('form-settings');
-            
             async function loadSettings() {
                 try {
                     const data = await apiFetch('/api/admin/settings');
                     Object.keys(data).forEach(key => {
                         const input = settingsForm.elements[key];
-                        if (input) {
-                            input.value = data[key];
-                        }
+                        if (input) { input.value = data[key]; }
                     });
-                } catch (error) {
-                    console.error('Gagal memuat pengaturan:', error);
-                }
+                } catch (error) { console.error('Gagal memuat pengaturan:', error); }
             }
-            
             settingsForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const formData = new FormData(settingsForm);
                 const data = Object.fromEntries(formData.entries());
-                
                 try {
                     await apiFetch('/api/admin/settings', {
                         method: 'POST',
@@ -808,34 +815,28 @@
                         body: JSON.stringify(data),
                     });
                     showToast('Pengaturan berhasil disimpan!');
-                } catch (error) {
-                    console.error('Gagal menyimpan pengaturan:', error);
-                }
+                } catch (error) { console.error('Gagal menyimpan pengaturan:', error); }
             });
 
             // --- 3. Manage Users ---
+            // (Tidak ada perubahan di sini...)
             const usersTableBody = document.getElementById('users-table-body');
             const userEditForm = document.getElementById('form-edit-user');
             let allUsers = [];
-
             async function loadUsers() {
                 try {
                     allUsers = await apiFetch('/api/admin/users');
                     renderUsersTable();
-                } catch (error) {
-                    console.error('Gagal memuat pengguna:', error);
-                }
+                } catch (error) { console.error('Gagal memuat pengguna:', error); }
             }
-
             function renderUsersTable() {
                 usersTableBody.innerHTML = '';
                 if (allUsers.length === 0) {
                     usersTableBody.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-gray-500">Tidak ada data pengguna</td></tr>`;
                     return;
                 }
-                
                 allUsers.forEach(user => {
-                    const row = `
+                    usersTableBody.innerHTML += `
                         <tr>
                             <td class="p-4">${user.name}</td>
                             <td class="p-4">${user.email}</td>
@@ -844,12 +845,9 @@
                             <td class="p-4 space-x-2">
                                 <button class="btn-edit-user text-blue-600 hover:text-blue-800" data-id="${user.id}">Edit</button>
                             </td>
-                        </tr>
-                    `;
-                    usersTableBody.innerHTML += row;
+                        </tr>`;
                 });
             }
-
             usersTableBody.addEventListener('click', (e) => {
                 if (e.target.classList.contains('btn-edit-user')) {
                     const userId = e.target.dataset.id;
@@ -862,7 +860,6 @@
                     openModal('modal-edit-user');
                 }
             });
-            
             userEditForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const id = document.getElementById('user-edit-id').value;
@@ -870,7 +867,6 @@
                     role: document.getElementById('user-edit-role').value,
                     status: document.getElementById('user-edit-status').value,
                 };
-                
                 try {
                     await apiFetch(`/api/admin/users/${id}`, {
                         method: 'PUT',
@@ -879,25 +875,22 @@
                     });
                     closeModal();
                     showToast('User berhasil diperbarui!');
-                    await loadUsers(); // Refresh tabel
-                } catch (error) {
-                    console.error('Gagal memperbarui user:', error);
-                }
+                    await loadUsers();
+                } catch (error) { console.error('Gagal memperbarui user:', error); }
             });
             
             // --- 4. Gifts Store ---
+            // (Tidak ada perubahan di sini...)
             const giftsTableBody = document.getElementById('gifts-table-body');
             const giftForm = document.getElementById('form-gift');
             const giftModalTitle = document.getElementById('gift-modal-title');
             let allGifts = [];
-            
             async function loadGifts() {
                 try {
                     allGifts = await apiFetch('/api/admin/gifts-store');
                     renderGiftsTable();
                 } catch (error) { console.error('Gagal memuat gifts:', error); }
             }
-            
             function renderGiftsTable() {
                 giftsTableBody.innerHTML = '';
                 if (allGifts.length === 0) {
@@ -905,7 +898,7 @@
                     return;
                 }
                 allGifts.forEach(gift => {
-                    const row = `
+                    giftsTableBody.innerHTML += `
                         <tr>
                             <td class="p-4">${gift.name_id_lang}</td>
                             <td class="p-4">${fTable.format(gift.price_idr)}</td>
@@ -916,24 +909,20 @@
                                 <button class="btn-edit-gift text-blue-600 hover:text-blue-800" data-id="${gift.id}">Edit</button>
                                 <button class="btn-delete-gift text-red-600 hover:text-red-800" data-id="${gift.id}">Delete</button>
                             </td>
-                        </tr>
-                    `;
-                    giftsTableBody.innerHTML += row;
+                        </tr>`;
                 });
             }
-
             document.getElementById('btn-add-gift').addEventListener('click', () => {
                 giftModalTitle.textContent = 'Add New Gift';
                 giftForm.reset();
                 document.getElementById('gift-edit-id').value = '';
                 openModal('modal-form-gift');
             });
-            
             giftsTableBody.addEventListener('click', (e) => {
                 if (e.target.classList.contains('btn-edit-gift')) {
                     const id = e.target.dataset.id;
                     const gift = allGifts.find(g => g.id === id);
-                    giftModalTitle.textContent = 'Edit Gift';
+                    // ... (mengisi form gift) ...
                     document.getElementById('gift-edit-id').value = gift.id;
                     document.getElementById('gift-name-id').value = gift.name_id;
                     document.getElementById('gift-name-en').value = gift.name_en;
@@ -954,13 +943,13 @@
                     });
                 }
             });
-            
             giftForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const id = document.getElementById('gift-edit-id').value;
                 const data = {
                     name_id: document.getElementById('gift-name-id').value,
                     name_en: document.getElementById('gift-name-en').value,
+                    // ... (data gift lainnya) ...
                     name_id_lang: document.getElementById('gift-name-id-lang').value,
                     image_url: document.getElementById('gift-image-url').value,
                     price_idr: parseInt(document.getElementById('gift-price-idr').value),
@@ -969,10 +958,8 @@
                     redeem_value_usd_cents: parseInt(document.getElementById('gift-redeem-usd').value),
                     is_active: parseInt(document.getElementById('gift-is-active').value),
                 };
-                
                 const url = id ? `/api/admin/gifts-store/${id}` : '/api/admin/gifts-store';
                 const method = id ? 'PUT' : 'POST';
-                
                 try {
                     await apiFetch(url, {
                         method: method,
@@ -1020,17 +1007,23 @@
                 });
             }
 
+            // -- PERUBAHAN: Saat klik "Add New Post" --
             document.getElementById('btn-add-post').addEventListener('click', () => {
                 postModalTitle.textContent = 'Add New Post';
                 postForm.reset();
                 document.getElementById('post-edit-id').value = '';
+                // Panggil fungsi untuk mengisi checkbox
+                populateCategoryTagCheckboxes([], []); // Kirim array kosong
                 openModal('modal-form-post');
             });
 
+            // -- PERUBAHAN: Saat klik "Edit Post" --
             postsTableBody.addEventListener('click', async (e) => {
                 if (e.target.classList.contains('btn-edit-post')) {
                     const id = e.target.dataset.id;
+                    // Ambil data post tunggal (backend HARUS diubah untuk menyertakan 'categories' dan 'tags')
                     const post = await apiFetch(`/api/admin/blog/posts/${id}`);
+                    
                     postModalTitle.textContent = 'Edit Post';
                     document.getElementById('post-edit-id').value = post.id;
                     document.getElementById('post-title').value = post.title;
@@ -1038,7 +1031,12 @@
                     document.getElementById('post-image-url').value = post.featured_image_url;
                     document.getElementById('post-content').value = post.content;
                     document.getElementById('post-status').value = post.status;
+                    
+                    // Panggil fungsi untuk mengisi DAN menandai checkbox
+                    populateCategoryTagCheckboxes(post.categories || [], post.tags || []);
+                    
                     openModal('modal-form-post');
+                    
                 } else if (e.target.classList.contains('btn-delete-post')) {
                     const id = e.target.dataset.id;
                     openDeleteConfirm('Anda yakin ingin menghapus postingan ini?', async () => {
@@ -1049,15 +1047,26 @@
                 }
             });
 
+            // -- PERUBAHAN: Saat "Save Post" --
             postForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const id = document.getElementById('post-edit-id').value;
+                
+                // Ambil ID kategori yang dicentang
+                const selectedCategoryIds = Array.from(document.querySelectorAll('#post-categories-list input[type=checkbox]:checked'))
+                                                 .map(cb => cb.value);
+                // Ambil ID tag yang dicentang
+                const selectedTagIds = Array.from(document.querySelectorAll('#post-tags-list input[type=checkbox]:checked'))
+                                             .map(cb => cb.value);
+                
                 const data = {
                     title: document.getElementById('post-title').value,
                     slug: document.getElementById('post-slug').value,
                     featured_image_url: document.getElementById('post-image-url').value,
                     content: document.getElementById('post-content').value,
                     status: document.getElementById('post-status').value,
+                    categories: selectedCategoryIds, // Kirim array ID
+                    tags: selectedTagIds           // Kirim array ID
                 };
                 
                 const url = id ? `/api/admin/blog/posts/${id}` : '/api/admin/blog/posts';
@@ -1091,7 +1100,7 @@
                     categories.forEach(cat => {
                         categoryList.innerHTML += `<div class="flex justify-between items-center p-2 bg-gray-50 rounded"><span>${cat.name}</span><button class="btn-delete-category text-red-500 hover:text-red-700" data-id="${cat.id}"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
                     });
-                    lucide.createIcons(); // Re-render ikon
+                    lucide.createIcons();
                 } catch (error) { console.error('Gagal memuat kategori:', error); }
             }
             
@@ -1108,6 +1117,7 @@
                     categoryInput.value = '';
                     showToast('Kategori dibuat!');
                     await loadBlogCategories();
+                    await loadAllBlogCategories(); // -- PERUBAHAN: Perbarui data global
                 } catch (error) { console.error('Gagal menyimpan kategori:', error); }
             });
 
@@ -1118,6 +1128,7 @@
                         await apiFetch(`/api/admin/blog/categories/${id}`, { method: 'DELETE' });
                         showToast('Kategori berhasil dihapus!');
                         await loadBlogCategories();
+                        await loadAllBlogCategories(); // -- PERUBAHAN: Perbarui data global
                     });
                 }
             });
@@ -1138,7 +1149,7 @@
                     tags.forEach(tag => {
                         tagList.innerHTML += `<div class="flex justify-between items-center p-2 bg-gray-50 rounded"><span>${tag.name}</span><button class="btn-delete-tag text-red-500 hover:text-red-700" data-id="${tag.id}"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`;
                     });
-                    lucide.createIcons(); // Re-render ikon
+                    lucide.createIcons();
                 } catch (error) { console.error('Gagal memuat tag:', error); }
             }
             
@@ -1155,6 +1166,7 @@
                     tagInput.value = '';
                     showToast('Tag dibuat!');
                     await loadBlogTags();
+                    await loadAllBlogTags(); // -- PERUBAHAN: Perbarui data global
                 } catch (error) { console.error('Gagal menyimpan tag:', error); }
             });
 
@@ -1165,23 +1177,23 @@
                         await apiFetch(`/api/admin/blog/tags/${id}`, { method: 'DELETE' });
                         showToast('Tag berhasil dihapus!');
                         await loadBlogTags();
+                        await loadAllBlogTags(); // -- PERUBAHAN: Perbarui data global
                     });
                 }
             });
             
             // --- 8. Manage Pages ---
+            // (Tidak ada perubahan di sini...)
             const pagesTableBody = document.getElementById('pages-table-body');
             const pageForm = document.getElementById('form-page');
             const pageModalTitle = document.getElementById('page-modal-title');
             let allPages = [];
-
             async function loadPages() {
                 try {
                     allPages = await apiFetch('/api/admin/pages');
                     renderPagesTable();
                 } catch (error) { console.error('Gagal memuat halaman:', error); }
             }
-            
             function renderPagesTable() {
                 pagesTableBody.innerHTML = '';
                 if (allPages.length === 0) {
@@ -1189,7 +1201,7 @@
                     return;
                 }
                 allPages.forEach(page => {
-                    const row = `
+                    pagesTableBody.innerHTML += `
                         <tr>
                             <td class="p-4">${page.title}</td>
                             <td class="p-4">${page.template_type}</td>
@@ -1198,19 +1210,15 @@
                                 <button class="btn-edit-page text-blue-600 hover:text-blue-800" data-id="${page.id}">Edit</button>
                                 <button class="btn-delete-page text-red-600 hover:text-red-800" data-id="${page.id}">Delete</button>
                             </td>
-                        </tr>
-                    `;
-                    pagesTableBody.innerHTML += row;
+                        </tr>`;
                 });
             }
-            
             document.getElementById('btn-add-page').addEventListener('click', () => {
                 pageModalTitle.textContent = 'Add New Page';
                 pageForm.reset();
                 document.getElementById('page-edit-id').value = '';
                 openModal('modal-form-page');
             });
-            
             pagesTableBody.addEventListener('click', async (e) => {
                 if (e.target.classList.contains('btn-edit-page')) {
                     const id = e.target.dataset.id;
@@ -1232,7 +1240,6 @@
                     });
                 }
             });
-
             pageForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const id = document.getElementById('page-edit-id').value;
@@ -1243,10 +1250,8 @@
                     content: document.getElementById('page-content').value,
                     status: document.getElementById('page-status').value,
                 };
-                
                 const url = id ? `/api/admin/pages/${id}` : '/api/admin/pages';
                 const method = id ? 'PUT' : 'POST';
-                
                 try {
                     await apiFetch(url, {
                         method: method,
@@ -1259,42 +1264,69 @@
                 } catch (error) { console.error('Gagal menyimpan halaman:', error); }
             });
 
+            // ======================================
+            // == FUNGSI BARU UNTUK KATEGORI & TAG ==
+            // ======================================
+            async function loadAllBlogCategories() {
+                try {
+                    allAvailableCategories = await apiFetch('/api/admin/blog/categories');
+                } catch (e) {
+                    showToast('Gagal memuat daftar kategori', true);
+                }
+            }
+            
+            async function loadAllBlogTags() {
+                 try {
+                    allAvailableTags = await apiFetch('/api/admin/blog/tags');
+                } catch (e) {
+                    showToast('Gagal memuat daftar tag', true);
+                }
+            }
+            
+            /**
+             * Mengisi kotak checkbox di modal post
+             * @param {string[]} checkedCategoryIds - Array ID kategori yang harus dicentang
+             * @param {string[]} checkedTagIds - Array ID tag yang harus dicentang
+             */
+            function populateCategoryTagCheckboxes(checkedCategoryIds = [], checkedTagIds = []) {
+                const catListEl = document.getElementById('post-categories-list');
+                const tagListEl = document.getElementById('post-tags-list');
+                
+                catListEl.innerHTML = '';
+                tagListEl.innerHTML = '';
+                
+                if (allAvailableCategories.length === 0) {
+                    catListEl.innerHTML = '<p class="text-gray-400 text-sm">Tidak ada kategori. Buat di halaman "Blog Categories".</p>';
+                } else {
+                    allAvailableCategories.forEach(cat => {
+                        const isChecked = checkedCategoryIds.includes(cat.id) ? 'checked' : '';
+                        catListEl.innerHTML += `
+                            <label class="flex items-center space-x-2 text-sm">
+                                <input type="checkbox" value="${cat.id}" class="rounded border-gray-300" ${isChecked}>
+                                <span>${cat.name}</span>
+                            </label>
+                        `;
+                    });
+                }
+                
+                if (allAvailableTags.length === 0) {
+                    tagListEl.innerHTML = '<p class="text-gray-400 text-sm">Tidak ada tag. Buat di halaman "Blog Tags".</p>';
+                } else {
+                     allAvailableTags.forEach(tag => {
+                        const isChecked = checkedTagIds.includes(tag.id) ? 'checked' : '';
+                        tagListEl.innerHTML += `
+                            <label class="flex items-center space-x-2 text-sm">
+                                <input type="checkbox" value="${tag.id}" class="rounded border-gray-300" ${isChecked}>
+                                <span>${tag.name}</span>
+                            </label>
+                        `;
+                    });
+                }
+            }
 
-            // --- F. INISIALISASI ---
+            // --- G. INISIALISASI ---
             initializeApp();
         }; // <-- AKHIR DARI window.onload
     </script>
-    
-    <!-- CSS untuk Nav Link (tidak bisa di-inline oleh Tailwind) -->
-    <style>
-        .nav-link {
-            display: flex;
-            align-items: center;
-            padding: 0.75rem 1.5rem;
-            font-size: 0.95rem;
-            font-weight: 500;
-            color: #4b5563;
-            transition: all 0.2s ease-in-out;
-        }
-        .nav-link:hover {
-            background-color: #f9fafb;
-            color: #1f2937;
-        }
-        .nav-link.active {
-            background-color: #eff6ff;
-            color: #2563eb;
-            border-right: 3px solid #2563eb;
-        }
-        .nav-link svg {
-            width: 1.15rem;
-            height: 1.15rem;
-            margin-right: 0.75rem;
-            flex-shrink: 0;
-        }
-        /* Style untuk modal backdrop */
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-    </style>
 </body>
 </html>
