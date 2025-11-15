@@ -1,21 +1,22 @@
-// functions/api/[[path]].js
 import { Hono } from 'hono';
 import { handle } from 'hono/cloudflare-pages';
+// Kita masih perlu 'serveStatic' untuk catch-all terakhir
+import { serveStatic } from 'hono/cloudflare-pages';
 
-// Impor rute API (perhatikan path '../')
-import adminRoutes from '../routes/admin.js';
-import memberRoutes from '../routes/member.js';
-import publicRoutes from '../routes/public.js';
-import authRoutes from '../routes/auth.js';
-import projectRoutes from '../routes/projects.js';
-import v1Routes from '../routes/v1.js';
-import hookRoutes from '../routes/hooks.js';
-import demoRoutes from '../routes/demo.js';
+// Impor semua rute API Anda (gunakan './')
+import adminRoutes from './routes/admin.js';
+import memberRoutes from './routes/member.js';
+import publicRoutes from './routes/public.js';
+import authRoutes from './routes/auth.js';
+import projectRoutes from './routes/projects.js';
+import v1Routes from './routes/v1.js';
+import hookRoutes from './routes/hooks.js';
+import demoRoutes from './routes/demo.js';
 
 const app = new Hono();
-const api = app.basePath('/api');
 
-// Daftarkan semua rute API Anda
+// --- 1. RUTE API (Tidak berubah) ---
+const api = app.basePath('/api');
 api.route('/admin', adminRoutes);
 api.route('/member', memberRoutes);
 api.route('/public', publicRoutes);
@@ -25,5 +26,31 @@ api.route('/demo', demoRoutes);
 api.route('/', authRoutes);
 api.route('/', hookRoutes);
 
-// TIDAK ADA 'serveStatic' DI FILE INI
+
+// --- 2. RUTE HALAMAN STATIS (PERBAIKAN UTAMA) ---
+// Handler ini akan mengambil file HTML statis dari direktori 'public' (ASSETS)
+const serveHtmlShell = (c, shellPath) => {
+  const url = new URL(c.req.url);
+  // Buat URL baru yang menunjuk ke file HTML shell di root
+  // Contoh: https://cuanfans.pages.dev/blog.html
+  const assetUrl = new URL(shellPath, url.origin);
+  // Ambil aset (blog.html atau page.html) dan sajikan
+  return c.env.ASSETS.fetch(assetUrl);
+};
+
+// Saat URL adalah /blog, sajikan shell /blog.html
+app.get('/blog', (c) => serveHtmlShell(c, 'blog.html'));
+
+// Saat URL adalah /blog/* (misal /blog/tesblog), sajikan JUGA shell /blog.html
+app.get('/blog/*', (c) => serveHtmlShell(c, 'blog.html'));
+
+// Saat URL adalah /p/*, sajikan shell /page.html
+app.get('/p/*', (c) => serveHtmlShell(c, 'page.html'));
+
+
+// --- 3. CATCH-ALL (TERAKHIR) ---
+// Ini akan menangani /index.html, /login.html, /admin.html,
+// dan semua aset lain (CSS, JS, gambar) yang namanya cocok.
+app.get('*', serveStatic({ root: './' }));
+
 export const onRequest = handle(app);
