@@ -10,7 +10,11 @@
         "/images/*",
         "/css/*",
         "/*.js",
-        "/*.css"
+        "/*.css",
+        "/admin.html",
+        "/member.html",
+        "/login.html",
+        "/register.html"
     ],
     "routes": [
         {
