@@ -1,7 +1,8 @@
+// functions/api/[[path]].js
 import { Hono } from 'hono';
 import { handle } from 'hono/cloudflare-pages';
 
-// Impor SEMUA rute API Anda (path harus diubah)
+// Impor rute API (perhatikan path '../')
 import adminRoutes from '../routes/admin.js';
 import memberRoutes from '../routes/member.js';
 import publicRoutes from '../routes/public.js';
@@ -12,9 +13,6 @@ import hookRoutes from '../routes/hooks.js';
 import demoRoutes from '../routes/demo.js';
 
 const app = new Hono();
-
-// 'basePath' SANGAT PENTING agar Hono tahu bahwa
-// file ini hanya mengurus /api
 const api = app.basePath('/api');
 
 // Daftarkan semua rute API Anda
@@ -27,7 +25,5 @@ api.route('/demo', demoRoutes);
 api.route('/', authRoutes);
 api.route('/', hookRoutes);
 
-// !!! PENTING: HAPUS SEMUA 'app.get' dan 'serveStatic'
-// untuk /blog, /p, dan * DARI FILE INI
-
+// TIDAK ADA 'serveStatic' DI FILE INI
 export const onRequest = handle(app);
