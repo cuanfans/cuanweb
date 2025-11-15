@@ -83,25 +83,6 @@
                     <i data-lucide="settings"></i>
                     <span>Settings</span>
                 </a>
-                <!-- Placeholder (bisa ditambahkan nanti) -->
-                <!-- 
-                <a href="#" class="nav-link" data-page="page-projects">
-                    <i data-lucide="briefcase"></i>
-                    <span>All Projects</span>
-                </a>
-                <a href="#" class="nav-link" data-page="page-transactions">
-                    <i data-lucide="arrow-left-right"></i>
-                    <span>All Transactions</span>
-                </a>
-                <a href="#" class="nav-link" data-page="page-wallets">
-                    <i data-lucide="wallet"></i>
-                    <span>Wallets & Redeem</span>
-                </a>
-                 <a href="#" class="nav-link" data-page="page-fans">
-                    <i data-lucide="heart"></i>
-                    <span>Manage Fans</span>
-                </a>
-                -->
             </nav>
             
             <!-- Tombol Logout di bawah -->
@@ -313,6 +294,7 @@
                     <h1 class="text-3xl font-bold text-gray-800 mb-6">Platform Payment Channels</h1>
                     <div class="bg-white rounded-lg shadow overflow-x-auto">
                         <p class="p-6 text-gray-500">[Placeholder untuk CRUD Channel Pembayaran Platform]</p>
+                        <!-- TODO: Implementasi UI untuk /api/admin/platform-channels -->
                     </div>
                 </div>
 
@@ -576,8 +558,18 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Inisialisasi Ikon Lucide
-            lucide.createIcons();
+            // =================================================================
+            // PERBAIKAN: Bungkus lucide.createIcons() dalam try...catch
+            // =================================================================
+            try {
+                lucide.createIcons();
+            } catch (e) {
+                console.warn("Lucide icons failed to initialize immediately. Retrying...");
+                // Coba lagi setelah 50ms jika gagal
+                setTimeout(() => {
+                    try { lucide.createIcons(); } catch (e) { console.error("Lucide failed again", e); }
+                }, 50);
+            }
 
             // === A. SELEKTOR UTAMA ===
             const navLinks = document.querySelectorAll('.nav-link');
@@ -1116,6 +1108,17 @@
                 } catch (error) { console.error('Gagal menyimpan kategori:', error); }
             });
 
+            categoryList.addEventListener('click', async (e) => {
+                if (e.target.closest('.btn-delete-category')) {
+                    const id = e.target.closest('.btn-delete-category').dataset.id;
+                    openDeleteConfirm('Anda yakin ingin menghapus kategori ini?', async () => {
+                        await apiFetch(`/api/admin/blog/categories/${id}`, { method: 'DELETE' });
+                        showToast('Kategori berhasil dihapus!');
+                        await loadBlogCategories();
+                    });
+                }
+            });
+
             // --- 7. Blog Tags ---
             const tagForm = document.getElementById('form-add-tag');
             const tagInput = document.getElementById('tag-name-input');
@@ -1150,6 +1153,17 @@
                     showToast('Tag dibuat!');
                     await loadBlogTags();
                 } catch (error) { console.error('Gagal menyimpan tag:', error); }
+            });
+
+            tagList.addEventListener('click', async (e) => {
+                if (e.target.closest('.btn-delete-tag')) {
+                    const id = e.target.closest('.btn-delete-tag').dataset.id;
+                    openDeleteConfirm('Anda yakin ingin menghapus tag ini?', async () => {
+                        await apiFetch(`/api/admin/blog/tags/${id}`, { method: 'DELETE' });
+                        showToast('Tag berhasil dihapus!');
+                        await loadBlogTags();
+                    });
+                }
             });
             
             // --- 8. Manage Pages ---
@@ -1195,7 +1209,25 @@
             });
             
             pagesTableBody.addEventListener('click', async (e) => {
-                // TODO: Implementasi Edit & Delete untuk Pages (mirip Blog)
+                if (e.target.classList.contains('btn-edit-page')) {
+                    const id = e.target.dataset.id;
+                    const page = await apiFetch(`/api/admin/pages/${id}`);
+                    pageModalTitle.textContent = 'Edit Page';
+                    document.getElementById('page-edit-id').value = page.id;
+                    document.getElementById('page-title').value = page.title;
+                    document.getElementById('page-slug').value = page.slug;
+                    document.getElementById('page-template').value = page.template_type;
+                    document.getElementById('page-content').value = page.content;
+                    document.getElementById('page-status').value = page.status;
+                    openModal('modal-form-page');
+                } else if (e.target.classList.contains('btn-delete-page')) {
+                    const id = e.target.dataset.id;
+                    openDeleteConfirm('Anda yakin ingin menghapus halaman ini?', async () => {
+                        await apiFetch(`/api/admin/pages/${id}`, { method: 'DELETE' });
+                        showToast('Halaman berhasil dihapus!');
+                        await loadPages();
+                    });
+                }
             });
 
             pageForm.addEventListener('submit', async (e) => {
