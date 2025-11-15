@@ -294,7 +294,6 @@
                     <h1 class="text-3xl font-bold text-gray-800 mb-6">Platform Payment Channels</h1>
                     <div class="bg-white rounded-lg shadow overflow-x-auto">
                         <p class="p-6 text-gray-500">[Placeholder untuk CRUD Channel Pembayaran Platform]</p>
-                        <!-- TODO: Implementasi UI untuk /api/admin/platform-channels -->
                     </div>
                 </div>
 
@@ -557,7 +556,11 @@
 
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        // =================================================================
+        // PERBAIKAN: Ganti 'DOMContentLoaded' menjadi 'window.onload'
+        // Ini untuk memastikan 'lucide' sudah dimuat sebelum .createIcons() dipanggil
+        // =================================================================
+        window.onload = () => {
             // =================================================================
             // PERBAIKAN: Bungkus lucide.createIcons() dalam try...catch
             // =================================================================
@@ -1259,7 +1262,7 @@
 
             // --- F. INISIALISASI ---
             initializeApp();
-        });
+        }; // <-- AKHIR DARI window.onload
     </script>
     
     <!-- CSS untuk Nav Link (tidak bisa di-inline oleh Tailwind) -->
