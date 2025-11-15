@@ -73,7 +73,10 @@
     </footer>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        // =================================================================
+        // PERBAIKAN: Ganti 'DOMContentLoaded' menjadi 'window.onload'
+        // =================================================================
+        window.onload = () => {
             try {
                 lucide.createIcons();
                 document.getElementById('footer-year').textContent = new Date().getFullYear();
@@ -104,6 +107,7 @@
                     const htmlContent = converter.makeHtml(page.content);
 
                     // Isi konten
+                    document.title = `${page.title} - CuanFans`; // Update judul tab browser
                     titleEl.textContent = page.title;
                     contentEl.innerHTML = htmlContent;
 
@@ -116,7 +120,7 @@
                     console.error('Error fetching single page:', error);
                 }
             }
-        });
+        };
     </script>
 </body>
 </html>
