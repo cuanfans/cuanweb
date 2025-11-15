@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog - CuanFans</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide-dev@0.395.0"></script>
+    <!-- Impor Showdown untuk konversi Markdown ke HTML -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .gradient-text {
+            background: linear-gradient(to right, #4f46e5, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        /* Style untuk konten blog */
+        .prose h1 { @apply text-3xl font-bold mb-4; }
+        .prose h2 { @apply text-2xl font-semibold mb-3; }
+        .prose p { @apply text-gray-700 mb-4 leading-relaxed; }
+        .prose a { @apply text-blue-600 hover:underline; }
+        .prose img { @apply rounded-lg shadow-md my-6; }
+        .prose ul { @apply list-disc list-inside mb-4; }
+        .prose pre { @apply bg-gray-900 text-white p-4 rounded-lg overflow-x-auto; }
+    </style>
+</head>
+<body class="bg-gray-50 antialiased">
+
+    <!-- Header (Sama seperti index.html untuk konsistensi) -->
+    <header id="header" class="relative z-10 w-full bg-white/70 backdrop-blur-md shadow-sm">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <a href="/" class="flex items-center space-x-2">
+                    <span class="p-2 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg">
+                        <i data-lucide="zap" class="text-white w-5 h-5"></i>
+                    </span>
+                    <span class="text-2xl font-bold text-gray-900">CuanFans</span>
+                </a>
+                <nav class="hidden md:flex md:items-center md:space-x-8">
+                    <a href="/#fitur" class="font-medium text-gray-600 hover:text-gray-900">Fitur</a>
+                    <a href="/#harga" class="font-medium text-gray-600 hover:text-gray-900">Harga</a>
+                    <a href="/#api" class="font-medium text-gray-600 hover:text-gray-900">API</a>
+                    <a href="/blog" class="font-medium text-blue-600">Blog</a>
+                </nav>
+                <div class="flex items-center space-x-4">
+                    <a href="/login.html" class="hidden md:inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50">Masuk</a>
+                    <a href="/register.html" class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md shadow-sm hover:bg-blue-700">Daftar</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Konten Utama -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="max-w-3xl mx-auto">
+            
+            <!-- Container untuk Daftar Postingan (Default) -->
+            <div id="blog-list-container">
+                <h1 class="text-4xl font-extrabold text-gray-900 mb-8">CuanFans <span class="gradient-text">Blog</span></h1>
+                <div id="blog-list" class="space-y-8">
+                    <!-- Daftar postingan akan dimuat di sini oleh JS -->
+                    <p class="text-gray-500">Memuat postingan...</p>
+                </div>
+            </div>
+
+            <!-- Container untuk Satu Postingan (Tersembunyi by default) -->
+            <div id="post-content-container" class="hidden prose lg:prose-lg max-w-none">
+                <h1 id="post-title" class="text-4xl font-extrabold text-gray-900 mb-4"></h1>
+                <div id="post-meta" class="text-gray-500 mb-4"></div>
+                <img id="post-image" src="" alt="" class="w-full h-auto rounded-lg mb-6">
+                <div id="post-content">
+                    <!-- Konten Markdown akan dirender di sini -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 mt-16">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <!-- Footer content (bisa disalin dari index.html) -->
+            <div class="mt-12 pt-8 border-t border-gray-800 text-center text-sm">
+                &copy; <span id="footer-year">2025</span> CuanFans. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                lucide.createIcons();
+                document.getElementById('footer-year').textContent = new Date().getFullYear();
+            } catch (e) { console.warn('Lucide failed to load'); }
+
+            const converter = new showdown.Converter();
+            const path = window.location.pathname;
+            const parts = path.split('/').filter(Boolean); // Cth: ['blog', 'nama-postingan']
+
+            const listContainer = document.getElementById('blog-list-container');
+            const postContainer = document.getElementById('post-content-container');
+
+            // Cek apakah kita di /blog atau /blog/slug
+            if (parts.length === 1 && parts[0] === 'blog') {
+                // Kita di halaman daftar blog
+                loadBlogList();
+            } else if (parts.length === 2 && parts[0] === 'blog') {
+                // Kita di halaman satu postingan
+                const slug = parts[1];
+                loadSinglePost(slug);
+            }
+
+            async function loadBlogList() {
+                try {
+                    const response = await fetch('/api/public/blog/posts');
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    const posts = await response.json();
+                    
+                    const listEl = document.getElementById('blog-list');
+                    listEl.innerHTML = ''; // Kosongkan "Memuat..."
+
+                    if (posts.length === 0) {
+                        listEl.innerHTML = '<p class="text-gray-500">Belum ada postingan.</p>';
+                        return;
+                    }
+
+                    posts.forEach(post => {
+                        const postDate = new Date(post.published_at * 1000).toLocaleDateString('id-ID', {
+                            year: 'numeric', month: 'long', day: 'numeric'
+                        });
+                        listEl.innerHTML += `
+                            <article class="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                                <a href="/blog/${post.slug}">
+                                    <h2 class="text-2xl font-bold text-gray-800 hover:text-blue-600 mb-2">${post.title}</h2>
+                                    <p class="text-gray-500 text-sm mb-4">Dipublikasikan pada ${postDate}</p>
+                                    ${post.featured_image_url ? `<img src="${post.featured_image_url}" alt="${post.title}" class="w-full h-48 object-cover rounded-md mb-4">` : ''}
+                                    <span class="font-semibold text-blue-600">Baca Selengkapnya &rarr;</span>
+                                </a>
+                            </article>
+                        `;
+                    });
+
+                } catch (error) {
+                    document.getElementById('blog-list').innerHTML = '<p class="text-red-500">Gagal memuat postingan.</p>';
+                    console.error('Error fetching blog list:', error);
+                }
+            }
+
+            async function loadSinglePost(slug) {
+                try {
+                    const response = await fetch(`/api/public/blog/posts/${slug}`);
+                    if (!response.ok) throw new Error('Postingan tidak ditemukan');
+                    const post = await response.json();
+
+                    // Konversi Markdown ke HTML
+                    const htmlContent = converter.makeHtml(post.content);
+                    const postDate = new Date(post.published_at * 1000).toLocaleDateString('id-ID', {
+                        year: 'numeric', month: 'long', day: 'numeric'
+                    });
+
+                    // Isi konten
+                    document.getElementById('post-title').textContent = post.title;
+                    document.getElementById('post-meta').textContent = `Oleh ${post.author_name} • ${postDate}`;
+                    document.getElementById('post-content').innerHTML = htmlContent;
+                    
+                    if (post.featured_image_url) {
+                        const imgEl = document.getElementById('post-image');
+                        imgEl.src = post.featured_image_url;
+                        imgEl.alt = post.title;
+                    } else {
+                        document.getElementById('post-image').classList.add('hidden');
+                    }
+
+                    // Tampilkan container postingan, sembunyikan container daftar
+                    listContainer.classList.add('hidden');
+                    postContainer.classList.remove('hidden');
+
+                } catch (error) {
+                    listContainer.innerHTML = `<h1 class="text-4xl font-bold text-red-500">404</h1><p class="text-gray-500">Postingan yang Anda cari tidak ditemukan.</p>`;
+                    console.error('Error fetching single post:', error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
