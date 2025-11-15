@@ -1,8 +1,9 @@
 import { Hono } from 'hono';
 import { handle } from 'hono/cloudflare-pages';
+// Kita masih perlu 'serveStatic' untuk catch-all terakhir
 import { serveStatic } from 'hono/cloudflare-pages';
 
-// ... (semua import rute API Anda: adminRoutes, dkk.) ...
+// Impor semua rute API Anda (gunakan './')
 import adminRoutes from './routes/admin.js';
 import memberRoutes from './routes/member.js';
 import publicRoutes from './routes/public.js';
@@ -26,12 +27,15 @@ api.route('/', authRoutes);
 api.route('/', hookRoutes);
 
 
-// --- 2. RUTE HALAMAN STATIS (VERSI BARU YANG LEBIH KUAT) ---
+// --- 2. RUTE HALAMAN STATIS (VERSI KUAT DENGAN LOGGING) ---
+// Handler ini akan mengambil file HTML statis dari direktori 'public' (ASSETS)
 const serveHtmlShell = async (c, shellPath) => {
   // LOG 1: Mencatat percobaan
   console.log(`Mencoba menyajikan shell: ${shellPath} untuk URL: ${c.req.url}`);
   
   const url = new URL(c.req.url);
+  // Buat URL baru yang menunjuk ke file HTML shell di root
+  // Contoh: https://cuanfans.pages.dev/blog.html
   const assetUrl = new URL(shellPath, url.origin);
   
   // LOG 2: Mencatat aset apa yang diambil
