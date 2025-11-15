@@ -1,9 +1,10 @@
+// functions/[[path]].js
+
 import { Hono } from 'hono';
 import { handle } from 'hono/cloudflare-pages';
-// Impor 'serveStatic' dari 'hono/cloudflare-pages'
 import { serveStatic } from 'hono/cloudflare-pages';
 
-// Impor "Plugins" (Rute yang sudah dipecah dari folder /routes)
+// ... Impor semua rute API Anda ...
 import adminRoutes from './routes/admin.js';
 import memberRoutes from './routes/member.js';
 import publicRoutes from './routes/public.js';
@@ -13,16 +14,13 @@ import v1Routes from './routes/v1.js';
 import hookRoutes from './routes/hooks.js';
 import demoRoutes from './routes/demo.js';
 
-// --- INISIALISASI HONO ---
 const app = new Hono();
-
-// --- PASANG "PLUGINS" KE RUTE UTAMA ---
 const api = app.basePath('/api');
 
-// Pasang rute-rute yang diimpor
+// ... Semua pendaftaran api.route(...) Anda ...
 api.route('/admin', adminRoutes);
 api.route('/member', memberRoutes);
-api.route('/public', publicRoutes); // API Anda tetap aman di sini
+api.route('/public', publicRoutes);
 api.route('/projects', projectRoutes);
 api.route('/v1', v1Routes);
 api.route('/demo', demoRoutes);
@@ -30,27 +28,15 @@ api.route('/', authRoutes);
 api.route('/', hookRoutes);
 
 
-// ===== BLOK DIAGNOSTIK (GANTIKAN KODE LAMA ANDA DENGAN INI) =====
+// ===== BLOK PERUTEAN SPA (KEMBALIKAN SEPERTI INI) =====
+// Ini harus ada SEBELUM catch-all terakhir
 
-app.get('/blog', (c) => {
-  return c.text('INI HALAMAN DAFTAR /blog');
-});
-
-app.get('/blog/*', (c) => {
-  return c.text('INI HALAMAN DETAIL /blog/*'); 
-});
-
-app.get('/p/*', (c) => {
-  return c.text('INI HALAMAN PAGES /p/*');
-});
+app.get('/blog', serveStatic({ path: './blog.html' }));
+app.get('/blog/*', serveStatic({ path: './blog.html' }));
+app.get('/p/*', serveStatic({ path: './page.html' }));
 // ========================================================
 
-
-// --- RUTE FILE STATIS ---
-// (Ini harus di bagian akhir)
-// 'serveStatic' ini sekarang akan menangani aset (CSS/JS/Gambar)
-// dan file HTML bernama (index.html, login.html, admin.html, dll)
+// --- CATCH-ALL TERAKHIR ---
 app.get('*', serveStatic({ root: './' }));
 
-// Handler untuk Cloudflare Pages
 export const onRequest = handle(app);
